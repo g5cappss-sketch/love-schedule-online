@@ -312,8 +312,52 @@
         #toast.show { transform: translateX(-50%) translateY(0); }
 
         /* STATS */
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .stat-box { padding: 16px; border-radius: 20px; text-align: center; }
+        /* --- CINEMA SEAT MAP STYLES --- */
+.cinema-grid {
+    display: grid; 
+    grid-template-columns: repeat(6, 1fr); /* 6 ô một hàng */
+    gap: 8px; 
+    margin-bottom: 15px;
+}
+
+.seat-item {
+    aspect-ratio: 1; 
+    border-radius: 8px;
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center;
+    font-size: 10px; 
+    font-weight: 700; 
+    color: white;
+    transition: transform 0.2s;
+}
+
+/* 3 Màu trạng thái */
+.seat-item.free { background: #4ade80; box-shadow: 0 2px 5px rgba(74, 222, 128, 0.4); } /* Rảnh - Xanh */
+.seat-item.mix { background: #fbbf24; box-shadow: 0 2px 5px rgba(251, 191, 36, 0.4); } /* Lệch - Vàng */
+.seat-item.busy { background: #ef4444; opacity: 0.4; } /* Bận - Đỏ nhạt */
+
+.session-title { 
+    font-size: 12px; font-weight: 800; color: var(--text-sub); 
+    margin: 15px 0 8px 0; text-transform: uppercase; letter-spacing: 1px; 
+    border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px;
+}
+
+.legend-row { 
+    display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; 
+    background: #f8fafc; padding: 10px; border-radius: 12px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-sub); }
+.dot { width: 10px; height: 10px; border-radius: 3px; }
+
+.stats-verdict {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white; padding: 15px; border-radius: 16px;
+    text-align: center; margin-top: 10px;
+    box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
+    animation: popIn 0.5s var(--ease-ios);
+}
         .stat-num { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
         
     </style>
@@ -395,13 +439,22 @@
         </div>
 
         <div id="modal-stats" class="modal-overlay">
-            <div class="modal-card">
-                <div class="handle"></div>
-                <div class="modal-title">Thống kê hôm nay 📊</div>
-                <div id="stats-body"></div>
-            </div>
-            <div class="absolute inset-0" onclick="closeModal('stats')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
+    <div class="modal-card">
+        <div class="handle"></div>
+        <div class="modal-title">Rạp Chiếu Phim Tình Yêu 🍿</div>
+        
+        <div class="legend-row">
+            <div class="legend-item"><div class="dot" style="background:#4ade80"></div> Rảnh</div>
+            <div class="legend-item"><div class="dot" style="background:#fbbf24"></div> Lệch</div>
+            <div class="legend-item"><div class="dot" style="background:#ef4444; opacity:0.5"></div> Bận</div>
         </div>
+
+        <div id="stats-body" style="overflow-y:auto; max-height:50vh; padding-right:5px"></div>
+        
+        <div id="stats-msg"></div>
+    </div>
+    <div class="absolute inset-0" onclick="closeModal('stats')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
+</div>
 
         <div id="modal-settings" class="modal-overlay">
             <div class="modal-card">
@@ -638,30 +691,57 @@
             }
         }
 
-        /* --- STATS & EXTRAS --- */
         function calcStats() {
-            const d = state.data[state.dayIdx] || {Giang:[], Huyen:[]};
-            let g = 0, h = 0, bG = Array(25).fill(0), bH = Array(25).fill(0);
-            
-            (d.Giang||[]).forEach(t=>{ g+=(t.end-t.start); for(let k=t.start;k<t.end;k++) bG[k]=1; });
-            (d.Huyen||[]).forEach(t=>{ h+=(t.end-t.start); for(let k=t.start;k<t.end;k++) bH[k]=1; });
-            
-            let free = 0; for(let i=8; i<=22; i++) if(!bG[i] && !bH[i]) free++;
+    const d = state.data[state.dayIdx] || {Giang:[], Huyen:[]};
+    let busyG = Array(24).fill(0), busyH = Array(24).fill(0);
+    
+    // Tính toán giờ bận
+    (d.Giang||[]).forEach(t=>{ for(let k=t.start;k<t.end;k++) busyG[k]=1; });
+    (d.Huyen||[]).forEach(t=>{ for(let k=t.start;k<t.end;k++) busyH[k]=1; });
+    
+    // Cấu hình 3 buổi chiếu phim
+    const sessions = [
+        { name: 'Buổi Sáng (6h - 12h)', start: 6, end: 12 },
+        { name: 'Buổi Chiều (12h - 18h)', start: 12, end: 18 },
+        { name: 'Buổi Tối (18h - 24h)', start: 18, end: 24 }
+    ];
 
-            document.getElementById('stats-body').innerHTML = `
-                <div class="stat-grid">
-                    <div class="stat-box" style="background:#dbeafe; color:#1e40af">
-                        <div class="stat-num">${g}h</div><div>Giang bận</div>
-                    </div>
-                    <div class="stat-box" style="background:#fce7f3; color:#9d174d">
-                        <div class="stat-num">${h}h</div><div>Huyền bận</div>
-                    </div>
-                </div>
-                <div style="background:var(--text-main); color:white; padding:20px; border-radius:20px; text-align:center;">
-                    ${free > 0 ? `🎉 Có <b>${free} tiếng</b> rảnh chung (8h-22h)!` : 'Cả hai đều bận rộn 🥺'}
+    let html = '';
+    let totalFree = 0;
+
+    sessions.forEach(sess => {
+        html += `<div class="session-title">${sess.name}</div>`;
+        html += `<div class="cinema-grid">`;
+        
+        for(let h=sess.start; h<sess.end; h++) {
+            let status = 'free'; // Mặc định là Rảnh (Xanh)
+            
+            if(busyG[h] && busyH[h]) {
+                status = 'busy'; // Cả 2 cùng bận (Đỏ)
+            } else if(busyG[h] || busyH[h]) {
+                status = 'mix'; // 1 người bận (Vàng/Cam)
+            }
+            
+            if(status === 'free') totalFree++;
+
+            html += `
+                <div class="seat-item ${status}">
+                    <div>${h}h</div>
                 </div>
             `;
         }
+        html += `</div>`;
+    });
+
+    document.getElementById('stats-body').innerHTML = html;
+    
+    // Câu chốt hạ của AI
+    const msg = totalFree > 0 
+        ? `<div>Tìm thấy <b>${totalFree} giờ</b> rảnh chung!</div><div style="font-size:12px; opacity:0.9; margin-top:4px">Ưu tiên chọn ô màu xanh lá nhé ❤️</div>` 
+        : `<div>Hôm nay kín lịch rồi 🥺</div><div style="font-size:12px; opacity:0.9; margin-top:4px">Cố gắng sắp xếp vào ngày mai nha!</div>`;
+        
+    document.getElementById('stats-msg').innerHTML = `<div class="stats-verdict">${msg}</div>`;
+}
 
         function toggleMood(u) {
             state.moods[u] = (state.moods[u] + 1) % MOODS.length;
