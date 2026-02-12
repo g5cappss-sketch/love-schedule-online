@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="sunset">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Love Schedule Ultimate</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        /* --- 1. CORE VARIABLES & RESET --- */
+        :root {
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+        }
+
+        /* THEMES */
+        [data-theme="sunset"] {
+            --bg-grad: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
+            --glass: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --surface: #ffffff;
+            --text-main: #4a044e;
+            --text-sub: #9d174d;
+            --primary: #db2777;
+            --secondary: #4f46e5;
+            --accent: #f472b6;
+        }
+
+        [data-theme="ocean"] {
+            --bg-grad: linear-gradient(135deg, #a5f3fc 0%, #2563eb 100%);
+            --glass: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #334155;
+            --primary: #0284c7;
+            --secondary: #0ea5e9;
+            --accent: #38bdf8;
+        }
+
+        [data-theme="dark"] {
+            --bg-grad: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            --glass: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --primary: #818cf8;
+            --secondary: #c084fc;
+            --accent: #6366f1;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        
+        body {
+            margin: 0; padding: 0;
+            font-family: var(--font-main);
+            background: #f0f2f5; /* Background nền PC */
+            height: 100vh; width: 100vw;
+            display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- 2. MOBILE FRAME WRAPPER (FIX VỠ GIAO DIỆN PC) --- */
+        #mobile-frame {
+            width: 100%; height: 100%;
+            background: var(--bg-grad);
+            position: relative;
+            display: flex; flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 0 0 transparent;
+        }
+
+        /* Chỉ áp dụng khung điện thoại khi màn hình lớn hơn 768px */
+        @media (min-width: 768px) {
+            #mobile-frame {
+                width: 375px; height: 812px;
+                border-radius: 40px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 8px solid #111;
+            }
+        }
+
+        /* --- 3. LOADING & SPLASH SCREEN --- */
+        #splash {
+            position: absolute; inset: 0; z-index: 9999;
+            background: var(--surface);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            transition: opacity 0.6s var(--ease-ios);
+        }
+        .loader-ring {
+            width: 50px; height: 50px; border: 4px solid var(--primary);
+            border-top-color: transparent; border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* --- 4. HEADER UI --- */
+        header {
+            flex: none; z-index: 50;
+            background: var(--glass);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding-top: max(10px, var(--safe-top));
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 20px;
+        }
+        .brand { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .live-dot {
+            width: 8px; height: 8px; background: #22c55e; border-radius: 50%;
+            display: inline-block; margin-left: 5px; box-shadow: 0 0 10px #22c55e;
+            animation: pulse 2s infinite;
+        }
+        
+        .btn-icon {
+            width: 42px; height: 42px; border-radius: 14px;
+            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.2);
+            color: var(--text-main); font-size: 18px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-icon:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+
+        .date-strip {
+            display: flex; gap: 12px; overflow-x: auto;
+            padding: 10px 20px 20px 20px;
+            scrollbar-width: none;
+        }
+        .day-chip {
+            flex: 0 0 60px; height: 75px;
+            background: var(--surface);
+            border-radius: 20px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 2px solid transparent;
+            transition: all 0.3s var(--ease-ios);
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .day-chip.active {
+            background: var(--primary); color: white;
+            box-shadow: 0 10px 20px -5px var(--primary);
+            transform: translateY(-4px);
+        }
+        .day-chip span:first-child { font-size: 12px; font-weight: 600; opacity: 0.8; margin-bottom: 4px; }
+        .day-chip span:last-child { font-size: 20px; font-weight: 800; }
+
+        /* --- 5. MAIN TIMELINE --- */
+        #main-view {
+            flex: 1; overflow-y: auto; position: relative;
+            scroll-behavior: smooth;
+            padding-bottom: 100px; /* Space for FAB */
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .sticky-user-bar {
+            position: sticky; top: 0; z-index: 40;
+            display: flex; padding: 10px; gap: 10px;
+            background: var(--glass); backdrop-filter: blur(10px);
+            margin: 10px; border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .user-pill {
+            flex: 1; padding: 8px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            transition: 0.2s; background: rgba(255,255,255,0.5);
+            color: var(--text-main);
+        }
+        .user-pill:active { transform: scale(0.96); }
+        .avatar { width: 28px; height: 28px; border-radius: 50%; background: white; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        /* GRID */
+        .grid-wrapper {
+            position: relative; margin-top: 10px;
+            height: 1920px; /* 24h * 80px */
+            background-image: 
+                linear-gradient(var(--glass-border) 1px, transparent 1px);
+            background-size: 100% 80px;
+        }
+        
+        .time-marker {
+            position: absolute; left: 10px; width: 40px; 
+            font-size: 11px; font-weight: 600; color: var(--text-sub);
+            display: flex; align-items: center; padding-top: 2px;
+        }
+
+        .col-area {
+            position: absolute; top: 0; bottom: 0;
+            width: calc(50% - 35px); /* Adjust width based on time marker */
+        }
+        #col-giang { left: 50px; border-right: 1px dashed rgba(0,0,0,0.1); }
+        #col-huyen { left: calc(50% + 15px); }
+
+        /* TASK CARD */
+        .task {
+            position: absolute; left: 4px; right: 4px;
+            border-radius: 16px; padding: 10px;
+            color: white; font-size: 12px; font-weight: 600;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            cursor: pointer; overflow: hidden;
+            animation: popIn 0.4s var(--ease-ios);
+            border: 1px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(5px);
+        }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        
+        .task.u-Giang { background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%); }
+        .task.u-Huyen { background: linear-gradient(135deg, var(--accent) 0%, #db2777 100%); }
+
+        .task-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+        .task-time { font-size: 11px; opacity: 0.9; }
+        .btn-del {
+            position: absolute; top: 5px; right: 5px;
+            width: 24px; height: 24px; background: rgba(0,0,0,0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; opacity: 0; transition: 0.2s;
+        }
+        .task:hover .btn-del { opacity: 1; }
+
+        /* NOW LINE */
+        #now-line {
+            position: absolute; left: 50px; right: 0; height: 2px; background: #ef4444;
+            z-index: 10; pointer-events: none;
+            box-shadow: 0 0 10px #ef4444;
+        }
+        #now-line::before {
+            content:'NOW'; position:absolute; left:-40px; top:-8px;
+            background:#ef4444; color:white; padding:2px 4px; border-radius:4px;
+            font-size:9px; font-weight:800;
+        }
+
+        /* --- 6. FAB & MODAL --- */
+        .fab {
+            position: absolute; bottom: 30px; right: 24px;
+            width: 64px; height: 64px; border-radius: 24px;
+            background: var(--text-main); color: var(--surface);
+            border: none; font-size: 28px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 60; transition: transform 0.3s var(--ease-ios);
+        }
+        .fab:active { transform: scale(0.9) rotate(90deg); }
+
+        .modal-overlay {
+            position: absolute; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            display: flex; align-items: flex-end;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .modal-card {
+            width: 100%; background: var(--surface);
+            border-radius: 32px 32px 0 0; padding: 24px;
+            padding-bottom: max(30px, var(--safe-bottom));
+            transform: translateY(100%); transition: transform 0.4s var(--ease-ios);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+        }
+        .modal-overlay.open .modal-card { transform: translateY(0); }
+
+        .handle { width: 40px; height: 5px; background: #e2e8f0; border-radius: 10px; margin: 0 auto 20px auto; }
+        .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text-main); }
+
+        /* FORM ELEMENTS */
+        .toggle-group { display: flex; background: #f1f5f9; padding: 5px; border-radius: 16px; margin-bottom: 20px; }
+        .toggle-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 700; color: var(--text-sub); transition: 0.2s; cursor: pointer; }
+        .toggle-btn.active.g { background: white; color: var(--primary); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .toggle-btn.active.h { background: white; color: var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
+        .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; margin-bottom: 10px; }
+        .cat-btn { 
+            padding: 10px 16px; border-radius: 20px; border: 1px solid var(--glass-border);
+            background: #f8fafc; font-weight: 600; font-size: 13px; color: var(--text-sub);
+            white-space: nowrap; cursor: pointer; transition: 0.2s; display: flex; gap: 6px;
+        }
+        .cat-btn.selected { background: var(--text-main); color: white; border-color: var(--text-main); transform: scale(1.05); }
+
+        .inp-group { background: #f8fafc; border-radius: 16px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border: 1px solid transparent; transition: 0.3s; }
+        .inp-group:focus-within { background: white; border-color: var(--text-main); }
+        .inp { border: none; background: transparent; width: 100%; font-size: 16px; font-weight: 600; outline: none; color: var(--text-main); }
+
+        .btn-main {
+            width: 100%; padding: 18px; border-radius: 20px;
+            background: var(--text-main); color: white;
+            border: none; font-size: 16px; font-weight: 800;
+            margin-top: 10px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2);
+        }
+        .btn-main:active { transform: scale(0.98); }
+
+        /* TOAST NOTIFICATION */
+        #toast {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 13px; font-weight: 600; z-index: 200; transition: transform 0.4s var(--ease-ios);
+            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* STATS */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-box { padding: 16px; border-radius: 20px; text-align: center; }
+        .stat-num { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+        
+    </style>
+</head>
+<body>
+
+    <div id="mobile-frame">
+        
+        <div id="splash">
+            <div class="loader-ring"></div>
+            <h2 style="margin-top:20px; font-size:16px; color:var(--text-sub)">Đang đồng bộ...</h2>
+        </div>
+
+        <div id="toast"><i class="fa-solid fa-check-circle" style="color:#4ade80"></i> <span>Đã lưu thành công</span></div>
+
+        <header>
+            <div class="header-top">
+                <div class="brand">Love Schedule <span class="live-dot"></span></div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-icon" onclick="openModal('stats')"><i class="fa-solid fa-chart-pie"></i></button>
+                    <button class="btn-icon" onclick="openModal('settings')"><i class="fa-solid fa-gear"></i></button>
+                </div>
+            </div>
+            <div class="date-strip" id="date-strip">
+                </div>
+        </header>
+
+        <div id="main-view">
+            <div class="sticky-user-bar">
+                <div class="user-pill" style="color:var(--primary)" onclick="toggleMood('Giang')">
+                    <div class="avatar">G</div> Giang <span id="mood-Giang">😊</span>
+                </div>
+                <div class="user-pill" style="color:var(--secondary)" onclick="toggleMood('Huyen')">
+                    <div class="avatar">H</div> Huyền <span id="mood-Huyen">🥰</span>
+                </div>
+            </div>
+
+            <div class="grid-wrapper" id="grid-area">
+                <div id="col-giang" class="col-area"></div>
+                <div id="col-huyen" class="col-area"></div>
+                <div id="now-line"></div>
+            </div>
+        </div>
+
+        <button class="fab" onclick="openAddModal()"><i class="fa-solid fa-plus"></i></button>
+
+        <div id="modal-add" class="modal-overlay">
+            <div class="modal-card">
+                <div class="handle"></div>
+                <div class="modal-title">Thêm lịch mới ✨</div>
+                
+                <div class="toggle-group">
+                    <button id="btn-u-Giang" onclick="setFormUser('Giang')" class="toggle-btn active g">Giang</button>
+                    <button id="btn-u-Huyen" onclick="setFormUser('Huyen')" class="toggle-btn">Huyền</button>
+                </div>
+
+                <div class="cat-scroll" id="cat-list"></div>
+
+                <div class="inp-group">
+                    <i class="fa-solid fa-pen" style="color:var(--text-sub)"></i>
+                    <input type="text" id="inp-title" class="inp" placeholder="Làm gì đó...">
+                </div>
+
+                <div style="display:flex; gap:12px; margin-bottom:20px;">
+                    <div class="inp-group" style="flex:1; margin:0">
+                        <i class="fa-regular fa-clock" style="color:var(--text-sub)"></i>
+                        <select id="inp-start" class="inp"></select>
+                    </div>
+                    <div style="display:flex; align-items:center; color:var(--text-sub)"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="inp-group" style="flex:1; margin:0">
+                        <i class="fa-regular fa-clock" style="color:var(--text-sub)"></i>
+                        <select id="inp-end" class="inp"></select>
+                    </div>
+                </div>
+
+                <button onclick="saveTask()" class="btn-main">Lưu Lịch</button>
+            </div>
+            <div class="absolute inset-0" onclick="closeModal('add')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
+        </div>
+
+        <div id="modal-stats" class="modal-overlay">
+            <div class="modal-card">
+                <div class="handle"></div>
+                <div class="modal-title">Thống kê hôm nay 📊</div>
+                <div id="stats-body"></div>
+            </div>
+            <div class="absolute inset-0" onclick="closeModal('stats')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
+        </div>
+
+        <div id="modal-settings" class="modal-overlay">
+            <div class="modal-card">
+                <div class="handle"></div>
+                <div class="modal-title">Cài đặt ⚙️</div>
+                
+                <p style="font-weight:700; margin-bottom:10px">Chọn giao diện (Theme)</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+                    <div onclick="setTheme('sunset')" style="height:50px; background:linear-gradient(135deg, #FF9A9E, #FECFEF); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
+                    <div onclick="setTheme('ocean')" style="height:50px; background:linear-gradient(135deg, #a5f3fc, #2563eb); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
+                    <div onclick="setTheme('dark')" style="height:50px; background:linear-gradient(135deg, #0f172a, #334155); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
+                </div>
+
+                <button onclick="resetData()" style="width:100%; padding:15px; border-radius:16px; background:#fee2e2; color:#ef4444; border:none; font-weight:700">
+                    <i class="fa-solid fa-trash"></i> Xóa lịch hôm nay
+                </button>
+            </div>
+            <div class="absolute inset-0" onclick="closeModal('settings')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
+        </div>
+    </div>
+
+    <script>
+        /* --- CONFIG FIREBASE --- */
+        const firebaseConfig = { 
+            apiKey : "AIzaSyAb14CBAprIN6zJVa_c6nDKCoRq-eMcyBg" , 
+            authDomain : "loveschedule-d0297.firebaseapp.com" , 
+            databaseURL : "https://loveschedule-d0297-default-rtdb.firebaseio.com" , 
+            projectId : "loveschedule-d0297" , 
+            storageBucket : "loveschedule-d0297.firebasestorage.app" , 
+            messagingSenderId : "495772360588" , 
+            appId : "1:495772360588:web:f816fab7d24cea06d640a9" , 
+            measurementId : "G-L83E6GRM6Y" 
+        };
+
+        // Khởi tạo Firebase
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        /* --- CONSTANTS & STATE --- */
+        const DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+        const CATS = [
+            {id:'study', icon:'📚', name:'Học'},
+            {id:'work', icon:'💻', name:'Làm'},
+            {id:'date', icon:'🍿', name:'Hẹn'},
+            {id:'game', icon:'🎮', name:'Game'},
+            {id:'eat', icon:'🍜', name:'Ăn'},
+            {id:'sleep', icon:'😴', name:'Ngủ'}
+        ];
+        const MOODS = ['😊','🥰','😤','😭','🤯','😴'];
+
+        let state = {
+            dayIdx: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
+            user: 'Giang',
+            cat: 'study',
+            data: Array(7).fill().map(() => ({ Giang: [], Huyen: [] })),
+            moods: { Giang: 0, Huyen: 1 },
+            theme: localStorage.getItem('ls_theme') || 'sunset'
+        };
+
+        /* --- CORE FUNCTIONS --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            setTheme(state.theme);
+            renderDays();
+            renderTimeMarkers();
+            renderFormUI();
+            
+            // Anti-Freeze: Tắt splash sau 1.5s nếu mạng lag
+            setTimeout(() => { document.getElementById('splash').style.opacity = 0; setTimeout(()=>document.getElementById('splash').style.display='none',500); }, 1500);
+
+            // Firebase Sync
+            db.ref('schedule_data').on('value', (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    state.data = val.data || state.data;
+                    state.moods = val.moods || state.moods;
+                    // Fix null array bug
+                    for(let i=0; i<7; i++) {
+                        if(!state.data[i]) state.data[i] = {Giang:[], Huyen:[]};
+                        if(!state.data[i].Giang) state.data[i].Giang=[];
+                        if(!state.data[i].Huyen) state.data[i].Huyen=[];
+                    }
+                }
+                renderBoard();
+                updateMoodUI();
+            });
+
+            // Scroll to Now
+            setTimeout(() => {
+                const h = new Date().getHours();
+                document.getElementById('main-view').scrollTop = (h * 80) - 150;
+            }, 800);
+
+            updateClock(); setInterval(updateClock, 60000);
+        });
+
+        function sync() {
+            db.ref('schedule_data').set({ data: state.data, moods: state.moods })
+                .then(() => showToast('Đã lưu thành công!', 'check'))
+                .catch(() => showToast('Lỗi kết nối!', 'error'));
+        }
+
+        /* --- RENDER UI --- */
+        function renderDays() {
+            const el = document.getElementById('date-strip');
+            el.innerHTML = '';
+            DAYS.forEach((d, i) => {
+                const today = new Date();
+                const diff = i - (today.getDay()===0?6:today.getDay()-1);
+                const dayNum = new Date(today.setDate(today.getDate()+diff)).getDate();
+                
+                const div = document.createElement('div');
+                div.className = `day-chip ${i===state.dayIdx ? 'active' : ''}`;
+                div.innerHTML = `<span>${d}</span><span>${dayNum}</span>`;
+                div.onclick = () => {
+                    state.dayIdx = i; renderDays(); renderBoard();
+                };
+                el.appendChild(div);
+            });
+        }
+
+        function renderTimeMarkers() {
+            const wrapper = document.getElementById('grid-area');
+            let html = '';
+            for(let i=0; i<=23; i++) {
+                html += `<div class="time-marker" style="top:${i*80}px">${i}:00</div>`;
+            }
+            // Keep user cols and line
+            wrapper.innerHTML = html + 
+                '<div id="col-giang" class="col-area"></div>' + 
+                '<div id="col-huyen" class="col-area"></div>' + 
+                '<div id="now-line"></div>';
+        }
+
+        function renderBoard() {
+            const d = state.data[state.dayIdx] || { Giang: [], Huyen: [] };
+            renderCol('giang', d.Giang || [], 'Giang');
+            renderCol('huyen', d.Huyen || [], 'Huyen');
+        }
+
+        function renderCol(id, tasks, user) {
+            const el = document.getElementById(`col-${id}`);
+            el.innerHTML = '';
+            tasks.forEach((t, i) => {
+                const cat = CATS.find(c => c.id === t.cat) || CATS[0];
+                const div = document.createElement('div');
+                div.className = `task u-${user}`;
+                div.style.top = (t.start * 80 + 2) + 'px';
+                div.style.height = ((t.end - t.start) * 80 - 4) + 'px';
+                div.innerHTML = `
+                    <div class="task-title">${cat.icon} ${t.title}</div>
+                    <div class="task-time">${t.start}:00 - ${t.end}:00</div>
+                    <div class="btn-del" onclick="event.stopPropagation(); delTask(${i}, '${user}')"><i class="fa-solid fa-xmark"></i></div>
+                `;
+                el.appendChild(div);
+            });
+        }
+
+        /* --- MODAL LOGIC --- */
+        function openModal(id) {
+            document.getElementById(`modal-${id}`).classList.add('open');
+            if(id === 'stats') calcStats();
+        }
+        function closeModal(id) {
+            document.getElementById(`modal-${id}`).classList.remove('open');
+        }
+        function openAddModal() {
+            openModal('add');
+            setFormUser(state.user);
+            const h = new Date().getHours();
+            document.getElementById('inp-start').value = h;
+            document.getElementById('inp-end').value = h+1;
+        }
+
+        /* --- FORM & ACTIONS --- */
+        function renderFormUI() {
+            // Cats
+            const cel = document.getElementById('cat-list');
+            CATS.forEach(c => {
+                const b = document.createElement('div');
+                b.className = 'cat-btn';
+                b.innerHTML = `${c.icon} ${c.name}`;
+                b.onclick = () => {
+                    state.cat = c.id;
+                    Array.from(cel.children).forEach(x => x.classList.remove('selected'));
+                    b.classList.add('selected');
+                };
+                cel.appendChild(b);
+            });
+            cel.children[0].classList.add('selected');
+
+            // Times
+            const selS = document.getElementById('inp-start');
+            const selE = document.getElementById('inp-end');
+            for(let i=0; i<=24; i++) {
+                const o = `<option value="${i}">${i}:00</option>`;
+                selS.innerHTML += o; selE.innerHTML += o;
+            }
+        }
+
+        function setFormUser(u) {
+            state.user = u;
+            document.getElementById('btn-u-Giang').className = `toggle-btn ${u==='Giang'?'active g':''}`;
+            document.getElementById('btn-u-Huyen').className = `toggle-btn ${u==='Huyen'?'active h':''}`;
+        }
+
+        function saveTask() {
+            let t = document.getElementById('inp-title').value.trim();
+            const s = parseInt(document.getElementById('inp-start').value);
+            const e = parseInt(document.getElementById('inp-end').value);
+            
+            if(!t) t = CATS.find(c=>c.id===state.cat).name;
+            if(s >= e) return showToast('Giờ kết thúc sai!', 'error');
+
+            if(!state.data[state.dayIdx]) state.data[state.dayIdx] = {Giang:[], Huyen:[]};
+            state.data[state.dayIdx][state.user].push({title:t, start:s, end:e, cat:state.cat});
+            
+            sync();
+            closeModal('add');
+            document.getElementById('inp-title').value = '';
+        }
+
+        function delTask(i, u) {
+            if(confirm('Xóa nha?')) {
+                state.data[state.dayIdx][u].splice(i, 1);
+                sync();
+            }
+        }
+
+        function resetData() {
+            if(confirm('Xóa sạch lịch hôm nay?')) {
+                state.data[state.dayIdx] = {Giang:[], Huyen:[]};
+                sync();
+                closeModal('settings');
+            }
+        }
+
+        /* --- STATS & EXTRAS --- */
+        function calcStats() {
+            const d = state.data[state.dayIdx] || {Giang:[], Huyen:[]};
+            let g = 0, h = 0, bG = Array(25).fill(0), bH = Array(25).fill(0);
+            
+            (d.Giang||[]).forEach(t=>{ g+=(t.end-t.start); for(let k=t.start;k<t.end;k++) bG[k]=1; });
+            (d.Huyen||[]).forEach(t=>{ h+=(t.end-t.start); for(let k=t.start;k<t.end;k++) bH[k]=1; });
+            
+            let free = 0; for(let i=8; i<=22; i++) if(!bG[i] && !bH[i]) free++;
+
+            document.getElementById('stats-body').innerHTML = `
+                <div class="stat-grid">
+                    <div class="stat-box" style="background:#dbeafe; color:#1e40af">
+                        <div class="stat-num">${g}h</div><div>Giang bận</div>
+                    </div>
+                    <div class="stat-box" style="background:#fce7f3; color:#9d174d">
+                        <div class="stat-num">${h}h</div><div>Huyền bận</div>
+                    </div>
+                </div>
+                <div style="background:var(--text-main); color:white; padding:20px; border-radius:20px; text-align:center;">
+                    ${free > 0 ? `🎉 Có <b>${free} tiếng</b> rảnh chung (8h-22h)!` : 'Cả hai đều bận rộn 🥺'}
+                </div>
+            `;
+        }
+
+        function toggleMood(u) {
+            state.moods[u] = (state.moods[u] + 1) % MOODS.length;
+            sync();
+        }
+        function updateMoodUI() {
+            if(state.moods) {
+                document.getElementById('mood-Giang').innerText = MOODS[state.moods.Giang];
+                document.getElementById('mood-Huyen').innerText = MOODS[state.moods.Huyen];
+            }
+        }
+
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.innerHTML = `<i class="fa-solid fa-${type==='error'?'circle-exclamation':'check-circle'}" style="color:${type==='error'?'#f87171':'#4ade80'}"></i> ${msg}`;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const t = (now.getHours()*80) + (now.getMinutes()/60*80);
+            document.getElementById('now-line').style.top = t + 'px';
+        }
+
+        function setTheme(t) {
+            state.theme = t;
+            localStorage.setItem('ls_theme', t);
+            document.documentElement.setAttribute('data-theme', t);
+            document.querySelectorAll('.theme-opt').forEach(el => {
+                if(el.getAttribute('onclick').includes(t)) el.style.border = "2px solid var(--text-main)";
+                else el.style.border = "2px solid transparent";
+            });
+        }
+    </script>
+</body>
+</html>
