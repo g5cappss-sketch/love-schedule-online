@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Love Schedule Ultimate</title>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Love Schedule</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -33,6 +34,7 @@
             --primary: #db2777;
             --secondary: #4f46e5;
             --accent: #f472b6;
+            --battery-fill: linear-gradient(90deg, #ff9a9e 0%, #ff6a88 50%, #ff99ac 100%);
         }
 
         [data-theme="ocean"] {
@@ -45,6 +47,7 @@
             --primary: #0284c7;
             --secondary: #0ea5e9;
             --accent: #38bdf8;
+            --battery-fill: linear-gradient(90deg, #a5f3fc 0%, #2563eb 100%);
         }
 
         [data-theme="dark"] {
@@ -57,6 +60,7 @@
             --primary: #818cf8;
             --secondary: #c084fc;
             --accent: #6366f1;
+            --battery-fill: linear-gradient(90deg, #818cf8 0%, #c084fc 100%);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -64,23 +68,21 @@
         body {
             margin: 0; padding: 0;
             font-family: var(--font-main);
-            background: #f0f2f5; /* Background nền PC */
+            background: #f0f2f5; 
             height: 100vh; width: 100vw;
             display: flex; justify-content: center; align-items: center;
             overflow: hidden;
         }
 
-        /* --- 2. MOBILE FRAME WRAPPER (FIX VỠ GIAO DIỆN PC) --- */
+        /* --- 2. MOBILE FRAME WRAPPER --- */
         #mobile-frame {
             width: 100%; height: 100%;
             background: var(--bg-grad);
             position: relative;
             display: flex; flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 0 0 0 transparent;
         }
 
-        /* Chỉ áp dụng khung điện thoại khi màn hình lớn hơn 768px */
         @media (min-width: 768px) {
             #mobile-frame {
                 width: 375px; height: 812px;
@@ -90,7 +92,7 @@
             }
         }
 
-        /* --- 3. LOADING & SPLASH SCREEN --- */
+        /* --- 3. LOADING --- */
         #splash {
             position: absolute; inset: 0; z-index: 9999;
             background: var(--surface);
@@ -117,9 +119,9 @@
 
         .header-top {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 20px;
+            padding: 10px 20px 5px 20px;
         }
-        .brand { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .brand { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
         .live-dot {
             width: 8px; height: 8px; background: #22c55e; border-radius: 50%;
             display: inline-block; margin-left: 5px; box-shadow: 0 0 10px #22c55e;
@@ -127,23 +129,33 @@
         }
         
         .btn-icon {
-            width: 42px; height: 42px; border-radius: 14px;
+            width: 40px; height: 40px; border-radius: 12px;
             border: 1px solid var(--glass-border); background: rgba(255,255,255,0.2);
-            color: var(--text-main); font-size: 18px;
+            color: var(--text-main); font-size: 16px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: transform 0.2s;
         }
         .btn-icon:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
 
+        /* WEEK TOGGLE */
+        .week-toggle {
+            display: flex; background: rgba(0,0,0,0.05); border-radius: 20px; margin: 0 20px 10px 20px; padding: 4px;
+        }
+        .week-btn {
+            flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 700;
+            color: var(--text-sub); border-radius: 16px; transition: 0.3s;
+        }
+        .week-btn.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+
         .date-strip {
-            display: flex; gap: 12px; overflow-x: auto;
-            padding: 10px 20px 20px 20px;
+            display: flex; gap: 10px; overflow-x: auto;
+            padding: 0 20px 15px 20px;
             scrollbar-width: none;
         }
         .day-chip {
-            flex: 0 0 60px; height: 75px;
+            flex: 0 0 55px; height: 70px;
             background: var(--surface);
-            border-radius: 20px;
+            border-radius: 18px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             border: 2px solid transparent;
@@ -152,17 +164,17 @@
         }
         .day-chip.active {
             background: var(--primary); color: white;
-            box-shadow: 0 10px 20px -5px var(--primary);
+            box-shadow: 0 8px 20px -5px var(--primary);
             transform: translateY(-4px);
         }
-        .day-chip span:first-child { font-size: 12px; font-weight: 600; opacity: 0.8; margin-bottom: 4px; }
-        .day-chip span:last-child { font-size: 20px; font-weight: 800; }
+        .day-chip span:first-child { font-size: 11px; font-weight: 600; opacity: 0.8; margin-bottom: 4px; }
+        .day-chip span:last-child { font-size: 18px; font-weight: 800; }
 
         /* --- 5. MAIN TIMELINE --- */
         #main-view {
             flex: 1; overflow-y: auto; position: relative;
             scroll-behavior: smooth;
-            padding-bottom: 100px; /* Space for FAB */
+            padding-bottom: 100px;
             background: rgba(255,255,255,0.3);
         }
         
@@ -175,20 +187,54 @@
         }
         .user-pill {
             flex: 1; padding: 8px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            font-weight: 700; font-size: 14px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            font-weight: 700; font-size: 13px; cursor: pointer;
             transition: 0.2s; background: rgba(255,255,255,0.5);
-            color: var(--text-main);
+            color: var(--text-main); position: relative;
         }
         .user-pill:active { transform: scale(0.96); }
         .avatar { width: 28px; height: 28px; border-radius: 50%; background: white; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        
+        /* Pet & Points */
+        .pet-icon { font-size: 20px; animation: bounce 2s infinite; }
+        .points-badge { 
+            background: var(--text-main); color: white; padding: 2px 6px; 
+            border-radius: 10px; font-size: 10px; font-weight: 800; margin-left: 4px; 
+        }
+        @keyframes bounce { 0%, 100% {transform:translateY(0);} 50% {transform:translateY(-3px);} }
+
+        /* LOVE BATTERY */
+        .love-battery-container { padding: 0 15px 10px 15px; }
+        .love-battery-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .love-battery-track {
+            height: 12px; background: rgba(255,255,255,0.5); border-radius: 6px; overflow: hidden; position: relative;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+        .love-battery-fill {
+            height: 100%; width: 0%; background: var(--battery-fill);
+            border-radius: 6px; transition: width 1s ease-out; position: relative;
+        }
+        .love-battery-fill::after {
+            content:''; position: absolute; top:0; left:0; right:0; bottom:0;
+            background: linear-gradient(45deg, rgba(255,255,255,0.4) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.4) 75%, transparent 75%, transparent);
+            background-size: 20px 20px; opacity: 0.3;
+        }
+
+        /* DAILY NOTE */
+        .daily-note-area {
+            margin: 0 10px 10px 10px; padding: 10px;
+            background: rgba(255,255,255,0.4); border-radius: 12px;
+            font-size: 13px; color: var(--text-main);
+            display: flex; gap: 8px; align-items: center; cursor: pointer;
+            border: 1px dashed var(--glass-border);
+        }
+        .note-content { flex: 1; font-style: italic; opacity: 0.8; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 
         /* GRID */
         .grid-wrapper {
-            position: relative; margin-top: 10px;
+            position: relative; margin-top: 5px;
             height: 1920px; /* 24h * 80px */
-            background-image: 
-                linear-gradient(var(--glass-border) 1px, transparent 1px);
+            background-image: linear-gradient(var(--glass-border) 1px, transparent 1px);
             background-size: 100% 80px;
         }
         
@@ -200,7 +246,7 @@
 
         .col-area {
             position: absolute; top: 0; bottom: 0;
-            width: calc(50% - 35px); /* Adjust width based on time marker */
+            width: calc(50% - 35px); 
         }
         #col-giang { left: 50px; border-right: 1px dashed rgba(0,0,0,0.1); }
         #col-huyen { left: calc(50% + 15px); }
@@ -208,26 +254,32 @@
         /* TASK CARD */
         .task {
             position: absolute; left: 4px; right: 4px;
-            border-radius: 16px; padding: 10px;
+            border-radius: 14px; padding: 8px;
             color: white; font-size: 12px; font-weight: 600;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             cursor: pointer; overflow: hidden;
             animation: popIn 0.4s var(--ease-ios);
             border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); transition: 0.2s;
         }
-        @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        
+        .task.done { opacity: 0.6; filter: grayscale(0.8); }
         .task.u-Giang { background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%); }
         .task.u-Huyen { background: linear-gradient(135deg, var(--accent) 0%, #db2777 100%); }
-
-        .task-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
-        .task-time { font-size: 11px; opacity: 0.9; }
+        .task-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .task-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; line-height: 1.2; }
+        .task-time { font-size: 10px; opacity: 0.9; }
+        .btn-check {
+            width: 18px; height: 18px; border-radius: 50%; 
+            border: 2px solid white; background: rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            margin-left: 4px; cursor: pointer; flex-shrink: 0;
+        }
+        .task.done .btn-check { background: #22c55e; border-color: #22c55e; }
         .btn-del {
-            position: absolute; top: 5px; right: 5px;
-            width: 24px; height: 24px; background: rgba(0,0,0,0.2);
+            position: absolute; bottom: 5px; right: 5px;
+            width: 20px; height: 20px; background: rgba(0,0,0,0.2);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; opacity: 0; transition: 0.2s;
+            color: white; opacity: 0; transition: 0.2s; font-size: 10px;
         }
         .task:hover .btn-del { opacity: 1; }
 
@@ -243,7 +295,7 @@
             font-size:9px; font-weight:800;
         }
 
-        /* --- 6. FAB & MODAL --- */
+        /* FAB & MODAL */
         .fab {
             position: absolute; bottom: 30px; right: 24px;
             width: 64px; height: 64px; border-radius: 24px;
@@ -262,7 +314,6 @@
             display: flex; align-items: flex-end;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
-
         .modal-card {
             width: 100%; background: var(--surface);
             border-radius: 32px 32px 0 0; padding: 24px;
@@ -271,11 +322,10 @@
             box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
         }
         .modal-overlay.open .modal-card { transform: translateY(0); }
-
         .handle { width: 40px; height: 5px; background: #e2e8f0; border-radius: 10px; margin: 0 auto 20px auto; }
         .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text-main); }
 
-        /* FORM ELEMENTS */
+        /* FORM */
         .toggle-group { display: flex; background: #f1f5f9; padding: 5px; border-radius: 16px; margin-bottom: 20px; }
         .toggle-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 700; color: var(--text-sub); transition: 0.2s; cursor: pointer; }
         .toggle-btn.active.g { background: white; color: var(--primary); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
@@ -302,64 +352,37 @@
         }
         .btn-main:active { transform: scale(0.98); }
 
-        /* TOAST NOTIFICATION */
-        #toast {
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px;
-            font-size: 13px; font-weight: 600; z-index: 200; transition: transform 0.4s var(--ease-ios);
-            display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
+        /* DUAL RANGE SLIDER */
+        .slider-container { position: relative; width: 100%; height: 50px; margin-bottom: 20px; margin-top: 10px; }
+        .slider-track { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; z-index: 1; }
+        .slider-track-fill { position: absolute; top: 50%; transform: translateY(-50%); height: 6px; background: var(--primary); z-index: 2; border-radius: 3px; }
+        .range-inp { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; pointer-events: none; -webkit-appearance: none; z-index: 3; background: none; }
+        .range-inp::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 24px; height: 24px; border-radius: 50%; background: white; border: 2px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
+        .time-display { display: flex; justify-content: space-between; font-weight: 800; color: var(--text-main); margin-bottom: 5px; font-size: 18px; }
+
+        /* SMART DATING POPUP */
+        .smart-dating-card { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border: 2px dashed #db2777; border-radius: 16px; padding: 15px; margin-top: 15px; text-align: center; display: none; animation: popIn 0.5s; }
+        .smart-btn { background: #db2777; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; margin-top: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(219, 39, 119, 0.4); }
+
+        /* HEART ANIMATION */
+        .floating-heart { position: fixed; font-size: 24px; color: #db2777; pointer-events: none; z-index: 999; animation: floatUp 1.5s ease-out forwards; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-200px) scale(1.5); opacity: 0; } }
+
+        /* STATS CSS */
+        .cinema-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 15px; }
+        .seat-item { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; transition: transform 0.2s; }
+        .seat-item.free { background: #4ade80; box-shadow: 0 2px 5px rgba(74, 222, 128, 0.4); }
+        .seat-item.mix { background: #fbbf24; box-shadow: 0 2px 5px rgba(251, 191, 36, 0.4); }
+        .seat-item.busy { background: #ef4444; opacity: 0.4; }
+        .session-title { font-size: 12px; font-weight: 800; color: var(--text-sub); margin: 15px 0 8px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px; }
+        .legend-row { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; background: #f8fafc; padding: 10px; border-radius: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-sub); }
+        .dot { width: 10px; height: 10px; border-radius: 3px; }
+        .stats-verdict { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 16px; text-align: center; margin-top: 10px; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3); animation: popIn 0.5s var(--ease-ios); }
+
+        /* TOAST */
+        #toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 200; transition: transform 0.4s var(--ease-ios); display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); white-space: nowrap; }
         #toast.show { transform: translateX(-50%) translateY(0); }
-
-        /* STATS */
-        /* --- CINEMA SEAT MAP STYLES --- */
-.cinema-grid {
-    display: grid; 
-    grid-template-columns: repeat(6, 1fr); /* 6 ô một hàng */
-    gap: 8px; 
-    margin-bottom: 15px;
-}
-
-.seat-item {
-    aspect-ratio: 1; 
-    border-radius: 8px;
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center;
-    font-size: 10px; 
-    font-weight: 700; 
-    color: white;
-    transition: transform 0.2s;
-}
-
-/* 3 Màu trạng thái */
-.seat-item.free { background: #4ade80; box-shadow: 0 2px 5px rgba(74, 222, 128, 0.4); } /* Rảnh - Xanh */
-.seat-item.mix { background: #fbbf24; box-shadow: 0 2px 5px rgba(251, 191, 36, 0.4); } /* Lệch - Vàng */
-.seat-item.busy { background: #ef4444; opacity: 0.4; } /* Bận - Đỏ nhạt */
-
-.session-title { 
-    font-size: 12px; font-weight: 800; color: var(--text-sub); 
-    margin: 15px 0 8px 0; text-transform: uppercase; letter-spacing: 1px; 
-    border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px;
-}
-
-.legend-row { 
-    display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; 
-    background: #f8fafc; padding: 10px; border-radius: 12px;
-}
-.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-sub); }
-.dot { width: 10px; height: 10px; border-radius: 3px; }
-
-.stats-verdict {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white; padding: 15px; border-radius: 16px;
-    text-align: center; margin-top: 10px;
-    box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
-    animation: popIn 0.5s var(--ease-ios);
-}
-        .stat-num { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
-        
     </style>
 </head>
 <body>
@@ -377,22 +400,44 @@
             <div class="header-top">
                 <div class="brand">Love Schedule <span class="live-dot"></span></div>
                 <div style="display: flex; gap: 8px;">
+                    <button class="btn-icon" onclick="sendPoke()"><i class="fa-solid fa-hand-point-right"></i></button>
                     <button class="btn-icon" onclick="openModal('stats')"><i class="fa-solid fa-chart-pie"></i></button>
                     <button class="btn-icon" onclick="openModal('settings')"><i class="fa-solid fa-gear"></i></button>
                 </div>
             </div>
-            <div class="date-strip" id="date-strip">
-                </div>
+
+            <div class="week-toggle">
+                <div class="week-btn active" id="wk-btn-0" onclick="setWeek(0)">Tuần Này</div>
+                <div class="week-btn" id="wk-btn-1" onclick="setWeek(1)">Tuần Sau</div>
+            </div>
+
+            <div class="date-strip" id="date-strip"></div>
         </header>
 
         <div id="main-view">
+            <div class="love-battery-container">
+                <div class="love-battery-label"><span>Pin Tình Yêu hôm nay 🔋</span> <span id="battery-txt">0%</span></div>
+                <div class="love-battery-track">
+                    <div class="love-battery-fill" id="battery-bar"></div>
+                </div>
+            </div>
+
             <div class="sticky-user-bar">
                 <div class="user-pill" style="color:var(--primary)" onclick="toggleMood('Giang')">
-                    <div class="avatar">G</div> Giang <span id="mood-Giang">😊</span>
+                    <div class="avatar">G</div> 
+                    <div>Giang <span class="pet-icon" id="pet-Giang">🐶</span></div>
+                    <span class="points-badge" id="pt-Giang">0</span>
                 </div>
                 <div class="user-pill" style="color:var(--secondary)" onclick="toggleMood('Huyen')">
-                    <div class="avatar">H</div> Huyền <span id="mood-Huyen">🥰</span>
+                    <div class="avatar">H</div> 
+                    <div>Huyền <span class="pet-icon" id="pet-Huyen">🐱</span></div>
+                    <span class="points-badge" id="pt-Huyen">0</span>
                 </div>
+            </div>
+
+            <div class="daily-note-area" onclick="openModal('note')">
+                <i class="fa-regular fa-note-sticky" style="color:var(--primary)"></i>
+                <div class="note-content" id="daily-note-display">Chạm để viết ghi chú cho ngày này...</div>
             </div>
 
             <div class="grid-wrapper" id="grid-area">
@@ -408,68 +453,78 @@
             <div class="modal-card">
                 <div class="handle"></div>
                 <div class="modal-title">Thêm lịch mới ✨</div>
-                
                 <div class="toggle-group">
                     <button id="btn-u-Giang" onclick="setFormUser('Giang')" class="toggle-btn active g">Giang</button>
                     <button id="btn-u-Huyen" onclick="setFormUser('Huyen')" class="toggle-btn">Huyền</button>
                 </div>
-
                 <div class="cat-scroll" id="cat-list"></div>
-
                 <div class="inp-group">
                     <i class="fa-solid fa-pen" style="color:var(--text-sub)"></i>
                     <input type="text" id="inp-title" class="inp" placeholder="Làm gì đó...">
                 </div>
-
-                <div style="display:flex; gap:12px; margin-bottom:20px;">
-                    <div class="inp-group" style="flex:1; margin:0">
-                        <i class="fa-regular fa-clock" style="color:var(--text-sub)"></i>
-                        <select id="inp-start" class="inp"></select>
+                <div style="margin-top:20px; margin-bottom:10px">
+                    <div class="time-display">
+                        <span id="txt-start">09:00</span>
+                        <i class="fa-solid fa-arrow-right" style="font-size:14px; opacity:0.5; margin-top:5px"></i>
+                        <span id="txt-end">11:00</span>
                     </div>
-                    <div style="display:flex; align-items:center; color:var(--text-sub)"><i class="fa-solid fa-arrow-right"></i></div>
-                    <div class="inp-group" style="flex:1; margin:0">
-                        <i class="fa-regular fa-clock" style="color:var(--text-sub)"></i>
-                        <select id="inp-end" class="inp"></select>
+                    <div class="slider-container">
+                        <div class="slider-track"></div>
+                        <div class="slider-track-fill" id="slider-fill"></div>
+                        <input type="range" min="0" max="24" step="0.5" value="9" id="range-1" class="range-inp" oninput="updateSlider()">
+                        <input type="range" min="0" max="24" step="0.5" value="11" id="range-2" class="range-inp" oninput="updateSlider()">
                     </div>
                 </div>
-
                 <button onclick="saveTask()" class="btn-main">Lưu Lịch</button>
             </div>
             <div class="absolute inset-0" onclick="closeModal('add')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
         </div>
 
-        <div id="modal-stats" class="modal-overlay">
-    <div class="modal-card">
-        <div class="handle"></div>
-        <div class="modal-title">Rạp Chiếu Phim Tình Yêu 🍿</div>
-        
-        <div class="legend-row">
-            <div class="legend-item"><div class="dot" style="background:#4ade80"></div> Rảnh</div>
-            <div class="legend-item"><div class="dot" style="background:#fbbf24"></div> Lệch</div>
-            <div class="legend-item"><div class="dot" style="background:#ef4444; opacity:0.5"></div> Bận</div>
+        <div id="modal-note" class="modal-overlay">
+            <div class="modal-card">
+                <div class="handle"></div>
+                <div class="modal-title">Ghi chú chung 📝</div>
+                <div class="inp-group">
+                    <textarea id="inp-note-text" class="inp" rows="4" placeholder="Nhắn nhủ gì đó... (Ví dụ: Nhớ mua trà sữa)" style="resize:none"></textarea>
+                </div>
+                <button onclick="saveNote()" class="btn-main">Lưu Ghi Chú</button>
+            </div>
+            <div class="absolute inset-0" onclick="closeModal('note')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
         </div>
 
-        <div id="stats-body" style="overflow-y:auto; max-height:50vh; padding-right:5px"></div>
-        
-        <div id="stats-msg"></div>
-    </div>
-    <div class="absolute inset-0" onclick="closeModal('stats')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
-</div>
+        <div id="modal-stats" class="modal-overlay">
+            <div class="modal-card">
+                <div class="handle"></div>
+                <div class="modal-title">Rạp Chiếu Phim Tình Yêu 🍿</div>
+                <div class="legend-row">
+                    <div class="legend-item"><div class="dot" style="background:#4ade80"></div> Rảnh</div>
+                    <div class="legend-item"><div class="dot" style="background:#fbbf24"></div> Lệch</div>
+                    <div class="legend-item"><div class="dot" style="background:#ef4444; opacity:0.5"></div> Bận</div>
+                </div>
+                <div id="stats-body" style="overflow-y:auto; max-height:50vh; padding-right:5px"></div>
+                <div id="smart-dating-popup" class="smart-dating-card">
+                    <div style="font-size:30px">💖</div>
+                    <div style="font-weight:700; color:#db2777; margin:5px 0">Cơ hội vàng!</div>
+                    <div style="font-size:13px; margin-bottom:10px">Cả hai đều rảnh từ <span id="smart-time"></span>.</div>
+                    <button class="smart-btn" onclick="quickAddDate()">Chốt kèo Date nha?</button>
+                </div>
+                <div id="stats-msg"></div>
+            </div>
+            <div class="absolute inset-0" onclick="closeModal('stats')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
+        </div>
 
         <div id="modal-settings" class="modal-overlay">
             <div class="modal-card">
                 <div class="handle"></div>
                 <div class="modal-title">Cài đặt ⚙️</div>
-                
-                <p style="font-weight:700; margin-bottom:10px">Chọn giao diện (Theme)</p>
+                <p style="font-weight:700; margin-bottom:10px">Chọn giao diện</p>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
                     <div onclick="setTheme('sunset')" style="height:50px; background:linear-gradient(135deg, #FF9A9E, #FECFEF); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
                     <div onclick="setTheme('ocean')" style="height:50px; background:linear-gradient(135deg, #a5f3fc, #2563eb); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
                     <div onclick="setTheme('dark')" style="height:50px; background:linear-gradient(135deg, #0f172a, #334155); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
                 </div>
-
                 <button onclick="resetData()" style="width:100%; padding:15px; border-radius:16px; background:#fee2e2; color:#ef4444; border:none; font-weight:700">
-                    <i class="fa-solid fa-trash"></i> Xóa lịch hôm nay
+                    <i class="fa-solid fa-trash"></i> Xóa lịch ngày này
                 </button>
             </div>
             <div class="absolute inset-0" onclick="closeModal('settings')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
@@ -489,7 +544,6 @@
             measurementId : "G-L83E6GRM6Y" 
         };
 
-        // Khởi tạo Firebase
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
@@ -504,14 +558,21 @@
             {id:'sleep', icon:'😴', name:'Ngủ'}
         ];
         const MOODS = ['😊','🥰','😤','😭','🤯','😴'];
+        const PET_G = ['🐶','🐕','🐩','🌭','🐕‍🦺'];
+        const PET_H = ['🐱','🐈','🐈‍⬛','🦁','😽'];
 
         let state = {
             dayIdx: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
+            weekOffset: 0, // 0 = Current Week, 1 = Next Week
             user: 'Giang',
             cat: 'study',
-            data: Array(7).fill().map(() => ({ Giang: [], Huyen: [] })),
+            // Extended data for 14 days (0-6: This week, 7-13: Next week)
+            data: Array(14).fill().map(() => ({ Giang: [], Huyen: [] })),
+            notes: Array(14).fill(''), // Notes for 14 days
             moods: { Giang: 0, Huyen: 1 },
-            theme: localStorage.getItem('ls_theme') || 'sunset'
+            points: { Giang: 0, Huyen: 0 },
+            theme: localStorage.getItem('ls_theme') || 'sunset',
+            smartStart: 0, smartEnd: 0
         };
 
         /* --- CORE FUNCTIONS --- */
@@ -521,27 +582,41 @@
             renderTimeMarkers();
             renderFormUI();
             
-            // Anti-Freeze: Tắt splash sau 1.5s nếu mạng lag
             setTimeout(() => { document.getElementById('splash').style.opacity = 0; setTimeout(()=>document.getElementById('splash').style.display='none',500); }, 1500);
 
-            // Firebase Sync
-            db.ref('schedule_data').on('value', (snapshot) => {
+            // Sync Main Data
+            db.ref('schedule_data_v2').on('value', (snapshot) => {
                 const val = snapshot.val();
                 if (val) {
                     state.data = val.data || state.data;
+                    state.notes = val.notes || state.notes;
                     state.moods = val.moods || state.moods;
-                    // Fix null array bug
-                    for(let i=0; i<7; i++) {
+                    state.points = val.points || { Giang: 0, Huyen: 0 };
+                    
+                    // Fix null arrays
+                    for(let i=0; i<14; i++) {
                         if(!state.data[i]) state.data[i] = {Giang:[], Huyen:[]};
                         if(!state.data[i].Giang) state.data[i].Giang=[];
                         if(!state.data[i].Huyen) state.data[i].Huyen=[];
+                        if(!state.notes[i]) state.notes[i] = '';
                     }
                 }
                 renderBoard();
-                updateMoodUI();
+                updateUserBar();
+                updateBattery();
+                updateNoteDisplay();
             });
 
-            // Scroll to Now
+            // Listen for Poke
+            db.ref('poke').on('value', (snap) => {
+                const val = snap.val();
+                if(val && val.ts > Date.now() - 5000 && val.from !== state.user) {
+                    showToast(`${val.from} vừa chọc bạn!`, 'check');
+                    spawnHearts();
+                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                }
+            });
+
             setTimeout(() => {
                 const h = new Date().getHours();
                 document.getElementById('main-view').scrollTop = (h * 80) - 150;
@@ -551,37 +626,71 @@
         });
 
         function sync() {
-            db.ref('schedule_data').set({ data: state.data, moods: state.moods })
-                .then(() => showToast('Đã lưu thành công!', 'check'))
-                .catch(() => showToast('Lỗi kết nối!', 'error'));
+            db.ref('schedule_data_v2').set({ 
+                data: state.data, 
+                notes: state.notes,
+                moods: state.moods, 
+                points: state.points 
+            }).catch(() => showToast('Lỗi mạng', 'error'));
         }
 
-        /* --- RENDER UI --- */
+        /* --- WEEK & DAY LOGIC --- */
+        function setWeek(offset) {
+            state.weekOffset = offset;
+            document.getElementById('wk-btn-0').className = `week-btn ${offset===0?'active':''}`;
+            document.getElementById('wk-btn-1').className = `week-btn ${offset===1?'active':''}`;
+            // If switching week, default to first day of that week, or keep relative day?
+            // Let's keep relative dayIdx unless it's Sunday switching to Monday
+            renderDays();
+            renderBoard();
+            updateNoteDisplay();
+            updateBattery();
+        }
+
         function renderDays() {
             const el = document.getElementById('date-strip');
             el.innerHTML = '';
+            
+            // Calculate start of THIS week (Monday)
+            const today = new Date();
+            const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            const startOfThisWeek = new Date(today);
+            startOfThisWeek.setDate(today.getDate() - currentDay);
+
+            // Add offset for next week
+            const startOfWeek = new Date(startOfThisWeek);
+            startOfWeek.setDate(startOfWeek.getDate() + (state.weekOffset * 7));
+
             DAYS.forEach((d, i) => {
-                const today = new Date();
-                const diff = i - (today.getDay()===0?6:today.getDay()-1);
-                const dayNum = new Date(today.setDate(today.getDate()+diff)).getDate();
+                const date = new Date(startOfWeek);
+                date.setDate(date.getDate() + i);
+                const dayNum = date.getDate();
                 
                 const div = document.createElement('div');
                 div.className = `day-chip ${i===state.dayIdx ? 'active' : ''}`;
                 div.innerHTML = `<span>${d}</span><span>${dayNum}</span>`;
                 div.onclick = () => {
-                    state.dayIdx = i; renderDays(); renderBoard();
+                    state.dayIdx = i; 
+                    renderDays(); 
+                    renderBoard();
+                    updateNoteDisplay();
+                    updateBattery();
                 };
                 el.appendChild(div);
             });
         }
 
+        function getRealDayIdx() {
+            return state.dayIdx + (state.weekOffset * 7);
+        }
+
+        /* --- RENDER BOARD --- */
         function renderTimeMarkers() {
             const wrapper = document.getElementById('grid-area');
             let html = '';
             for(let i=0; i<=23; i++) {
                 html += `<div class="time-marker" style="top:${i*80}px">${i}:00</div>`;
             }
-            // Keep user cols and line
             wrapper.innerHTML = html + 
                 '<div id="col-giang" class="col-area"></div>' + 
                 '<div id="col-huyen" class="col-area"></div>' + 
@@ -589,9 +698,13 @@
         }
 
         function renderBoard() {
-            const d = state.data[state.dayIdx] || { Giang: [], Huyen: [] };
+            const realIdx = getRealDayIdx();
+            const d = state.data[realIdx] || { Giang: [], Huyen: [] };
             renderCol('giang', d.Giang || [], 'Giang');
             renderCol('huyen', d.Huyen || [], 'Huyen');
+            
+            // Show/Hide Now Line based on week
+            document.getElementById('now-line').style.display = (state.weekOffset === 0) ? 'block' : 'none';
         }
 
         function renderCol(id, tasks, user) {
@@ -600,37 +713,127 @@
             tasks.forEach((t, i) => {
                 const cat = CATS.find(c => c.id === t.cat) || CATS[0];
                 const div = document.createElement('div');
-                div.className = `task u-${user}`;
+                div.className = `task u-${user} ${t.done ? 'done' : ''}`;
                 div.style.top = (t.start * 80 + 2) + 'px';
                 div.style.height = ((t.end - t.start) * 80 - 4) + 'px';
                 div.innerHTML = `
-                    <div class="task-title">${cat.icon} ${t.title}</div>
-                    <div class="task-time">${t.start}:00 - ${t.end}:00</div>
+                    <div class="task-header">
+                        <div class="task-title">${cat.icon} ${t.title}</div>
+                        <div class="btn-check" onclick="event.stopPropagation(); toggleDone(${i}, '${user}')">
+                            <i class="fa-solid fa-check" style="font-size:10px; color:white; display:${t.done?'block':'none'}"></i>
+                        </div>
+                    </div>
+                    <div class="task-time">${formatTime(t.start)} - ${formatTime(t.end)}</div>
                     <div class="btn-del" onclick="event.stopPropagation(); delTask(${i}, '${user}')"><i class="fa-solid fa-xmark"></i></div>
                 `;
                 el.appendChild(div);
             });
         }
 
-        /* --- MODAL LOGIC --- */
+        /* --- LOVE BATTERY LOGIC --- */
+        function updateBattery() {
+            const realIdx = getRealDayIdx();
+            const d = state.data[realIdx];
+            if(!d) return;
+
+            // Simple heuristic: Count hours where both have tasks OR one has a 'date' task
+            let togetherScore = 0;
+            const tasksG = d.Giang || [];
+            const tasksH = d.Huyen || [];
+            
+            // 1. Check Date tasks (High value)
+            tasksG.forEach(t => { if(t.cat === 'date') togetherScore += (t.end - t.start) * 2; });
+            tasksH.forEach(t => { if(t.cat === 'date') togetherScore += (t.end - t.start) * 2; });
+
+            // 2. Check Overlaps
+            // This is a simplified overlap check
+            let grid = Array(48).fill(0); // 30min slots
+            tasksG.forEach(t => { for(let k=t.start*2; k<t.end*2; k++) grid[k] += 1; });
+            tasksH.forEach(t => { for(let k=t.start*2; k<t.end*2; k++) grid[k] += 1; });
+            
+            let overlaps = 0;
+            grid.forEach(val => { if(val >= 2) overlaps++; });
+            togetherScore += (overlaps * 0.5); // 1 hour overlap = 1 point
+
+            // Cap at 100% (Let's say 8 "points" is 100% - aka 4 hours together)
+            let pct = Math.min(100, Math.round((togetherScore / 8) * 100));
+            
+            document.getElementById('battery-bar').style.width = pct + '%';
+            document.getElementById('battery-txt').innerText = pct + '%';
+        }
+
+        /* --- DAILY NOTES --- */
+        function updateNoteDisplay() {
+            const realIdx = getRealDayIdx();
+            const txt = state.notes[realIdx];
+            const el = document.getElementById('daily-note-display');
+            if(txt && txt.trim() !== '') {
+                el.innerText = txt;
+                el.style.fontStyle = 'normal';
+                el.style.opacity = '1';
+            } else {
+                el.innerText = "Chạm để viết ghi chú cho ngày này...";
+                el.style.fontStyle = 'italic';
+                el.style.opacity = '0.7';
+            }
+        }
+
+        function saveNote() {
+            const txt = document.getElementById('inp-note-text').value;
+            const realIdx = getRealDayIdx();
+            state.notes[realIdx] = txt;
+            sync();
+            closeModal('note');
+        }
+
+        /* --- MODAL LOGIC & SLIDER --- */
         function openModal(id) {
             document.getElementById(`modal-${id}`).classList.add('open');
             if(id === 'stats') calcStats();
+            if(id === 'note') {
+                document.getElementById('inp-note-text').value = state.notes[getRealDayIdx()] || '';
+            }
         }
         function closeModal(id) {
             document.getElementById(`modal-${id}`).classList.remove('open');
         }
+        
         function openAddModal() {
             openModal('add');
             setFormUser(state.user);
             const h = new Date().getHours();
-            document.getElementById('inp-start').value = h;
-            document.getElementById('inp-end').value = h+1;
+            document.getElementById('range-1').value = h;
+            document.getElementById('range-2').value = h + 1.5;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const r1 = document.getElementById('range-1');
+            const r2 = document.getElementById('range-2');
+            let val1 = parseFloat(r1.value);
+            let val2 = parseFloat(r2.value);
+
+            if (val1 >= val2) { val1 = val2 - 0.5; r1.value = val1; } 
+
+            const percent1 = (val1 / 24) * 100;
+            const percent2 = (val2 / 24) * 100;
+
+            const fill = document.getElementById('slider-fill');
+            fill.style.left = percent1 + "%";
+            fill.style.width = (percent2 - percent1) + "%";
+
+            document.getElementById('txt-start').innerText = formatTime(val1);
+            document.getElementById('txt-end').innerText = formatTime(val2);
+        }
+
+        function formatTime(val) {
+            const h = Math.floor(val);
+            const m = (val - h) * 60;
+            return `${h.toString().padStart(2,'0')}:${m===0?'00':m}`;
         }
 
         /* --- FORM & ACTIONS --- */
         function renderFormUI() {
-            // Cats
             const cel = document.getElementById('cat-list');
             CATS.forEach(c => {
                 const b = document.createElement('div');
@@ -644,14 +847,6 @@
                 cel.appendChild(b);
             });
             cel.children[0].classList.add('selected');
-
-            // Times
-            const selS = document.getElementById('inp-start');
-            const selE = document.getElementById('inp-end');
-            for(let i=0; i<=24; i++) {
-                const o = `<option value="${i}">${i}:00</option>`;
-                selS.innerHTML += o; selE.innerHTML += o;
-            }
         }
 
         function setFormUser(u) {
@@ -662,98 +857,169 @@
 
         function saveTask() {
             let t = document.getElementById('inp-title').value.trim();
-            const s = parseInt(document.getElementById('inp-start').value);
-            const e = parseInt(document.getElementById('inp-end').value);
+            const s = parseFloat(document.getElementById('range-1').value);
+            const e = parseFloat(document.getElementById('range-2').value);
             
-            if(!t) t = CATS.find(c=>c.id===state.cat).name;
-            if(s >= e) return showToast('Giờ kết thúc sai!', 'error');
+            const CUTE_TITLES = {
+                study: ['Cày deadline', 'Tu luyện bí kíp', 'Học vì tương lai'],
+                date: ['Đi trốn', 'Nạp năng lượng', 'Date Time ❤️'],
+                game: ['Gánh team', 'Leo rank', 'Giải cứu thế giới'],
+                eat: ['Ăn sập quán', 'Nạp mana', 'Đói quá rồi']
+            };
+            if(!t) {
+                const arr = CUTE_TITLES[state.cat] || [CATS.find(c=>c.id===state.cat).name];
+                t = arr[Math.floor(Math.random() * arr.length)];
+            }
 
-            if(!state.data[state.dayIdx]) state.data[state.dayIdx] = {Giang:[], Huyen:[]};
-            state.data[state.dayIdx][state.user].push({title:t, start:s, end:e, cat:state.cat});
+            const realIdx = getRealDayIdx();
+            if(!state.data[realIdx]) state.data[realIdx] = {Giang:[], Huyen:[]};
+            state.data[realIdx][state.user].push({title:t, start:s, end:e, cat:state.cat, done:false});
             
             sync();
             closeModal('add');
             document.getElementById('inp-title').value = '';
         }
 
+        function toggleDone(i, u) {
+            const realIdx = getRealDayIdx();
+            const task = state.data[realIdx][u][i];
+            task.done = !task.done;
+            if(task.done) {
+                state.points[u] += 10;
+                showToast(`+10 điểm cho ${u}!`, 'check');
+                spawnHearts();
+            } else {
+                state.points[u] = Math.max(0, state.points[u] - 10);
+            }
+            sync();
+        }
+
         function delTask(i, u) {
             if(confirm('Xóa nha?')) {
-                state.data[state.dayIdx][u].splice(i, 1);
+                const realIdx = getRealDayIdx();
+                state.data[realIdx][u].splice(i, 1);
                 sync();
             }
         }
 
         function resetData() {
-            if(confirm('Xóa sạch lịch hôm nay?')) {
-                state.data[state.dayIdx] = {Giang:[], Huyen:[]};
+            if(confirm('Xóa sạch lịch ngày này?')) {
+                const realIdx = getRealDayIdx();
+                state.data[realIdx] = {Giang:[], Huyen:[]};
                 sync();
                 closeModal('settings');
             }
         }
 
+        /* --- STATS --- */
         function calcStats() {
-    const d = state.data[state.dayIdx] || {Giang:[], Huyen:[]};
-    let busyG = Array(24).fill(0), busyH = Array(24).fill(0);
-    
-    // Tính toán giờ bận
-    (d.Giang||[]).forEach(t=>{ for(let k=t.start;k<t.end;k++) busyG[k]=1; });
-    (d.Huyen||[]).forEach(t=>{ for(let k=t.start;k<t.end;k++) busyH[k]=1; });
-    
-    // Cấu hình 3 buổi chiếu phim
-    const sessions = [
-        { name: 'Buổi Sáng (6h - 12h)', start: 6, end: 12 },
-        { name: 'Buổi Chiều (12h - 18h)', start: 12, end: 18 },
-        { name: 'Buổi Tối (18h - 24h)', start: 18, end: 24 }
-    ];
-
-    let html = '';
-    let totalFree = 0;
-
-    sessions.forEach(sess => {
-        html += `<div class="session-title">${sess.name}</div>`;
-        html += `<div class="cinema-grid">`;
-        
-        for(let h=sess.start; h<sess.end; h++) {
-            let status = 'free'; // Mặc định là Rảnh (Xanh)
+            const realIdx = getRealDayIdx();
+            const d = state.data[realIdx] || {Giang:[], Huyen:[]};
+            let busyG = Array(48).fill(0), busyH = Array(48).fill(0);
             
-            if(busyG[h] && busyH[h]) {
-                status = 'busy'; // Cả 2 cùng bận (Đỏ)
-            } else if(busyG[h] || busyH[h]) {
-                status = 'mix'; // 1 người bận (Vàng/Cam)
+            (d.Giang||[]).forEach(t=>{ for(let k=t.start*2; k<t.end*2; k++) busyG[k]=1; });
+            (d.Huyen||[]).forEach(t=>{ for(let k=t.start*2; k<t.end*2; k++) busyH[k]=1; });
+            
+            let freeStreak = 0;
+            let foundSmart = false;
+            for(let i=16; i<44; i++) { 
+                if(busyG[i]===0 && busyH[i]===0) {
+                    freeStreak++;
+                    if(freeStreak >= 6) { 
+                        state.smartStart = (i - 5) / 2;
+                        state.smartEnd = (i + 1) / 2;
+                        foundSmart = true;
+                    }
+                } else {
+                    freeStreak = 0;
+                }
             }
-            
-            if(status === 'free') totalFree++;
 
-            html += `
-                <div class="seat-item ${status}">
-                    <div>${h}h</div>
-                </div>
-            `;
+            if(foundSmart) {
+                document.getElementById('smart-dating-popup').style.display = 'block';
+                document.getElementById('smart-time').innerText = `${formatTime(state.smartStart)} - ${formatTime(state.smartEnd)}`;
+            } else {
+                document.getElementById('smart-dating-popup').style.display = 'none';
+            }
+
+            const sessions = [
+                { name: 'Sáng', start: 6, end: 12 },
+                { name: 'Chiều', start: 12, end: 18 },
+                { name: 'Tối', start: 18, end: 24 }
+            ];
+            let html = '';
+            let totalFree = 0;
+            sessions.forEach(sess => {
+                html += `<div class="session-title">${sess.name}</div><div class="cinema-grid">`;
+                for(let h=sess.start; h<sess.end; h++) {
+                    let status = 'free'; 
+                    const s1 = h*2, s2 = h*2+1;
+                    const bG = busyG[s1] || busyG[s2];
+                    const bH = busyH[s1] || busyH[s2];
+                    
+                    if(bG && bH) status = 'busy';
+                    else if(bG || bH) status = 'mix';
+                    
+                    if(status === 'free') totalFree++;
+                    html += `<div class="seat-item ${status}"><div>${h}h</div></div>`;
+                }
+                html += `</div>`;
+            });
+
+            document.getElementById('stats-body').innerHTML = html;
+            const msg = totalFree > 0 
+                ? `<div>Tìm thấy <b>${totalFree} giờ</b> rảnh chung!</div><div style="font-size:12px; opacity:0.9; margin-top:4px">Màu xanh là chân ái 💚</div>` 
+                : `<div>Kín lịch rồi 🥺</div>`;
+            document.getElementById('stats-msg').innerHTML = `<div class="stats-verdict">${msg}</div>`;
         }
-        html += `</div>`;
-    });
 
-    document.getElementById('stats-body').innerHTML = html;
-    
-    // Câu chốt hạ của AI
-    const msg = totalFree > 0 
-        ? `<div>Tìm thấy <b>${totalFree} giờ</b> rảnh chung!</div><div style="font-size:12px; opacity:0.9; margin-top:4px">Ưu tiên chọn ô màu xanh lá nhé ❤️</div>` 
-        : `<div>Hôm nay kín lịch rồi 🥺</div><div style="font-size:12px; opacity:0.9; margin-top:4px">Cố gắng sắp xếp vào ngày mai nha!</div>`;
-        
-    document.getElementById('stats-msg').innerHTML = `<div class="stats-verdict">${msg}</div>`;
-}
+        function quickAddDate() {
+            const realIdx = getRealDayIdx();
+            if(!state.data[realIdx]) state.data[realIdx] = {Giang:[], Huyen:[]};
+            const task = { title: "Date Night 💖", start: state.smartStart, end: state.smartEnd, cat: "date", done: false };
+            state.data[realIdx].Giang.push(task);
+            state.data[realIdx].Huyen.push(task);
+            sync();
+            closeModal('stats');
+            showToast('Đã lên kèo Date!', 'check');
+            spawnHearts();
+        }
+
+        /* --- VISUAL EFFECTS --- */
+        function sendPoke() {
+            db.ref('poke').set({ from: state.user, ts: Date.now() });
+            showToast(`Đã chọc ${state.user==='Giang'?'Huyền':'Giang'}!`, 'check');
+            spawnHearts();
+        }
+
+        function spawnHearts() {
+            for(let i=0; i<10; i++) {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                heart.className = 'floating-heart';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.top = '100vh';
+                heart.style.animationDuration = (Math.random() * 1 + 1) + 's';
+                document.body.appendChild(heart);
+                setTimeout(() => heart.remove(), 2000);
+            }
+        }
 
         function toggleMood(u) {
             state.moods[u] = (state.moods[u] + 1) % MOODS.length;
             sync();
         }
-        function updateMoodUI() {
-            if(state.moods) {
-                document.getElementById('mood-Giang').innerText = MOODS[state.moods.Giang];
-                document.getElementById('mood-Huyen').innerText = MOODS[state.moods.Huyen];
-            }
+        
+        function updateUserBar() {
+            const mG = state.moods.Giang;
+            const mH = state.moods.Huyen;
+            document.getElementById('pet-Giang').innerText = (mG < 2) ? PET_G[0] : PET_G[2]; 
+            document.getElementById('pet-Huyen').innerText = (mH < 2) ? PET_H[0] : PET_H[3]; 
+            document.getElementById('pt-Giang').innerText = state.points.Giang;
+            document.getElementById('pt-Huyen').innerText = state.points.Huyen;
         }
 
+        /* --- UTILS --- */
         function showToast(msg, type) {
             const t = document.getElementById('toast');
             t.innerHTML = `<i class="fa-solid fa-${type==='error'?'circle-exclamation':'check-circle'}" style="color:${type==='error'?'#f87171':'#4ade80'}"></i> ${msg}`;
