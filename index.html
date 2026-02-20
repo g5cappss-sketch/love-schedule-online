@@ -34,7 +34,7 @@
             --primary: #db2777;
             --secondary: #4f46e5;
             --accent: #f472b6;
-            --battery-fill: linear-gradient(90deg, #ff9a9e 0%, #ff6a88 50%, #ff99ac 100%);
+            --now-color: #ef4444;
         }
 
         [data-theme="ocean"] {
@@ -47,7 +47,7 @@
             --primary: #0284c7;
             --secondary: #0ea5e9;
             --accent: #38bdf8;
-            --battery-fill: linear-gradient(90deg, #a5f3fc 0%, #2563eb 100%);
+            --now-color: #ef4444;
         }
 
         [data-theme="dark"] {
@@ -60,7 +60,7 @@
             --primary: #818cf8;
             --secondary: #c084fc;
             --accent: #6366f1;
-            --battery-fill: linear-gradient(90deg, #818cf8 0%, #c084fc 100%);
+            --now-color: #f87171;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
@@ -144,6 +144,7 @@
         .week-btn {
             flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 700;
             color: var(--text-sub); border-radius: 16px; transition: 0.3s;
+            cursor: pointer;
         }
         .week-btn.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
@@ -203,33 +204,6 @@
         }
         @keyframes bounce { 0%, 100% {transform:translateY(0);} 50% {transform:translateY(-3px);} }
 
-        /* LOVE BATTERY */
-        .love-battery-container { padding: 0 15px 10px 15px; }
-        .love-battery-label { font-size: 11px; font-weight: 700; color: var(--text-sub); margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .love-battery-track {
-            height: 12px; background: rgba(255,255,255,0.5); border-radius: 6px; overflow: hidden; position: relative;
-            border: 1px solid rgba(255,255,255,0.6);
-        }
-        .love-battery-fill {
-            height: 100%; width: 0%; background: var(--battery-fill);
-            border-radius: 6px; transition: width 1s ease-out; position: relative;
-        }
-        .love-battery-fill::after {
-            content:''; position: absolute; top:0; left:0; right:0; bottom:0;
-            background: linear-gradient(45deg, rgba(255,255,255,0.4) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.4) 75%, transparent 75%, transparent);
-            background-size: 20px 20px; opacity: 0.3;
-        }
-
-        /* DAILY NOTE */
-        .daily-note-area {
-            margin: 0 10px 10px 10px; padding: 10px;
-            background: rgba(255,255,255,0.4); border-radius: 12px;
-            font-size: 13px; color: var(--text-main);
-            display: flex; gap: 8px; align-items: center; cursor: pointer;
-            border: 1px dashed var(--glass-border);
-        }
-        .note-content { flex: 1; font-style: italic; opacity: 0.8; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
         /* GRID */
         .grid-wrapper {
             position: relative; margin-top: 5px;
@@ -283,16 +257,26 @@
         }
         .task:hover .btn-del { opacity: 1; }
 
-        /* NOW LINE */
+        /* UPGRADED REALTIME LASER LINE */
         #now-line {
-            position: absolute; left: 50px; right: 0; height: 2px; background: #ef4444;
+            position: absolute; left: 0; right: 0; height: 2px; background: var(--now-color);
             z-index: 10; pointer-events: none;
-            box-shadow: 0 0 10px #ef4444;
+            box-shadow: 0 0 10px var(--now-color), 0 0 20px var(--now-color);
+            transition: top 1s linear;
         }
         #now-line::before {
-            content:'NOW'; position:absolute; left:-40px; top:-8px;
-            background:#ef4444; color:white; padding:2px 4px; border-radius:4px;
-            font-size:9px; font-weight:800;
+            content:''; position: absolute; left: 45px; top: -4px;
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--surface); border: 2px solid var(--now-color);
+            box-shadow: 0 0 10px var(--now-color);
+        }
+        /* Time Indicator on Line */
+        #now-line-time {
+            position: absolute; right: 15px; top: -12px;
+            background: var(--now-color); color: white;
+            padding: 4px 10px; border-radius: 12px;
+            font-size: 11px; font-weight: 800; letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
 
         /* FAB & MODAL */
@@ -324,6 +308,27 @@
         .modal-overlay.open .modal-card { transform: translateY(0); }
         .handle { width: 40px; height: 5px; background: #e2e8f0; border-radius: 10px; margin: 0 auto 20px auto; }
         .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text-main); }
+
+        /* CUSTOM CONFIRM DIALOG */
+        #dialog-overlay {
+            position: absolute; inset: 0; z-index: 200;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+        }
+        #dialog-overlay.show { opacity: 1; pointer-events: auto; }
+        .dialog-box {
+            width: 80%; background: var(--surface); padding: 20px;
+            border-radius: 24px; text-align: center;
+            transform: scale(0.9); transition: transform 0.2s var(--ease-ios);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+        }
+        #dialog-overlay.show .dialog-box { transform: scale(1); }
+        .dialog-btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .d-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-family: var(--font-main);}
+        .d-btn:active { transform: scale(0.95); }
+        .d-btn.cancel { background: #f1f5f9; color: var(--text-sub); }
+        .d-btn.confirm { background: var(--text-main); color: white; }
 
         /* FORM */
         .toggle-group { display: flex; background: #f1f5f9; padding: 5px; border-radius: 16px; margin-bottom: 20px; }
@@ -396,6 +401,18 @@
 
         <div id="toast"><i class="fa-solid fa-check-circle" style="color:#4ade80"></i> <span>Đã lưu thành công</span></div>
 
+        <div id="dialog-overlay">
+            <div class="dialog-box">
+                <div style="font-size:40px; margin-bottom:10px">🤔</div>
+                <div style="font-weight:800; font-size:18px; color:var(--text-main); margin-bottom:5px" id="d-title">Xác nhận</div>
+                <div style="color:var(--text-sub); font-size:14px" id="d-msg">Bạn chắc chắn chứ?</div>
+                <div class="dialog-btn-row">
+                    <button class="d-btn cancel" onclick="closeDialog(false)">Huỷ</button>
+                    <button class="d-btn confirm" onclick="closeDialog(true)">OK Chốt</button>
+                </div>
+            </div>
+        </div>
+
         <header>
             <div class="header-top">
                 <div class="brand">Love Schedule <span class="live-dot"></span></div>
@@ -415,13 +432,6 @@
         </header>
 
         <div id="main-view">
-            <div class="love-battery-container">
-                <div class="love-battery-label"><span>Pin Tình Yêu hôm nay 🔋</span> <span id="battery-txt">0%</span></div>
-                <div class="love-battery-track">
-                    <div class="love-battery-fill" id="battery-bar"></div>
-                </div>
-            </div>
-
             <div class="sticky-user-bar">
                 <div class="user-pill" style="color:var(--primary)" onclick="toggleMood('Giang')">
                     <div class="avatar">G</div> 
@@ -435,15 +445,13 @@
                 </div>
             </div>
 
-            <div class="daily-note-area" onclick="openModal('note')">
-                <i class="fa-regular fa-note-sticky" style="color:var(--primary)"></i>
-                <div class="note-content" id="daily-note-display">Chạm để viết ghi chú cho ngày này...</div>
-            </div>
-
             <div class="grid-wrapper" id="grid-area">
                 <div id="col-giang" class="col-area"></div>
                 <div id="col-huyen" class="col-area"></div>
-                <div id="now-line"></div>
+                
+                <div id="now-line">
+                    <div id="now-line-time">00:00</div>
+                </div>
             </div>
         </div>
 
@@ -478,18 +486,6 @@
                 <button onclick="saveTask()" class="btn-main">Lưu Lịch</button>
             </div>
             <div class="absolute inset-0" onclick="closeModal('add')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
-        </div>
-
-        <div id="modal-note" class="modal-overlay">
-            <div class="modal-card">
-                <div class="handle"></div>
-                <div class="modal-title">Ghi chú chung 📝</div>
-                <div class="inp-group">
-                    <textarea id="inp-note-text" class="inp" rows="4" placeholder="Nhắn nhủ gì đó... (Ví dụ: Nhớ mua trà sữa)" style="resize:none"></textarea>
-                </div>
-                <button onclick="saveNote()" class="btn-main">Lưu Ghi Chú</button>
-            </div>
-            <div class="absolute inset-0" onclick="closeModal('note')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
         </div>
 
         <div id="modal-stats" class="modal-overlay">
@@ -563,17 +559,18 @@
 
         let state = {
             dayIdx: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-            weekOffset: 0, // 0 = Current Week, 1 = Next Week
+            weekOffset: 0, // 0 = Tuần này, 1 = Tuần sau
             user: 'Giang',
             cat: 'study',
-            // Extended data for 14 days (0-6: This week, 7-13: Next week)
-            data: Array(14).fill().map(() => ({ Giang: [], Huyen: [] })),
-            notes: Array(14).fill(''), // Notes for 14 days
+            // ĐỔI SANG OBJECT MAP THEO NGÀY (YYYY-MM-DD) ĐỂ KHÔNG BỊ LỖI LỆCH TUẦN
+            data: {}, 
             moods: { Giang: 0, Huyen: 1 },
             points: { Giang: 0, Huyen: 0 },
             theme: localStorage.getItem('ls_theme') || 'sunset',
             smartStart: 0, smartEnd: 0
         };
+
+        let dialogCallback = null;
 
         /* --- CORE FUNCTIONS --- */
         document.addEventListener('DOMContentLoaded', () => {
@@ -584,27 +581,16 @@
             
             setTimeout(() => { document.getElementById('splash').style.opacity = 0; setTimeout(()=>document.getElementById('splash').style.display='none',500); }, 1500);
 
-            // Sync Main Data
-            db.ref('schedule_data_v2').on('value', (snapshot) => {
+            // Sync Data (Dùng bảng mới v3 để reset format dữ liệu lưu theo ngày thực tế)
+            db.ref('schedule_data_v3').on('value', (snapshot) => {
                 const val = snapshot.val();
                 if (val) {
-                    state.data = val.data || state.data;
-                    state.notes = val.notes || state.notes;
+                    state.data = val.data || {};
                     state.moods = val.moods || state.moods;
                     state.points = val.points || { Giang: 0, Huyen: 0 };
-                    
-                    // Fix null arrays
-                    for(let i=0; i<14; i++) {
-                        if(!state.data[i]) state.data[i] = {Giang:[], Huyen:[]};
-                        if(!state.data[i].Giang) state.data[i].Giang=[];
-                        if(!state.data[i].Huyen) state.data[i].Huyen=[];
-                        if(!state.notes[i]) state.notes[i] = '';
-                    }
                 }
                 renderBoard();
                 updateUserBar();
-                updateBattery();
-                updateNoteDisplay();
             });
 
             // Listen for Poke
@@ -626,38 +612,58 @@
         });
 
         function sync() {
-            db.ref('schedule_data_v2').set({ 
+            db.ref('schedule_data_v3').set({ 
                 data: state.data, 
-                notes: state.notes,
                 moods: state.moods, 
                 points: state.points 
             }).catch(() => showToast('Lỗi mạng', 'error'));
         }
 
-        /* --- WEEK & DAY LOGIC --- */
+        /* --- DIALOG TÙY CHỈNH --- */
+        function showConfirm(title, msg, callback) {
+            document.getElementById('d-title').innerText = title;
+            document.getElementById('d-msg').innerText = msg;
+            document.getElementById('dialog-overlay').classList.add('show');
+            dialogCallback = callback;
+        }
+        function closeDialog(confirmed) {
+            document.getElementById('dialog-overlay').classList.remove('show');
+            if(confirmed && dialogCallback) dialogCallback();
+            dialogCallback = null;
+        }
+
+        /* --- WEEK & DAY LẤY CHUẨN ĐỊNH DẠNG NGÀY --- */
+        function getDateKey(weekOffset, dayIdx) {
+            const today = new Date();
+            const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1; // T2(0) -> CN(6)
+            
+            // Tính ngày bắt đầu của tuần hiện tại (Thứ 2)
+            const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - currentDay);
+            // Cộng thêm tuần và ngày đang trỏ tới
+            startOfWeek.setDate(startOfWeek.getDate() + (weekOffset * 7) + dayIdx);
+            
+            const yyyy = startOfWeek.getFullYear();
+            const mm = String(startOfWeek.getMonth() + 1).padStart(2, '0');
+            const dd = String(startOfWeek.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
         function setWeek(offset) {
             state.weekOffset = offset;
             document.getElementById('wk-btn-0').className = `week-btn ${offset===0?'active':''}`;
             document.getElementById('wk-btn-1').className = `week-btn ${offset===1?'active':''}`;
-            // If switching week, default to first day of that week, or keep relative day?
-            // Let's keep relative dayIdx unless it's Sunday switching to Monday
             renderDays();
             renderBoard();
-            updateNoteDisplay();
-            updateBattery();
         }
 
         function renderDays() {
             const el = document.getElementById('date-strip');
             el.innerHTML = '';
             
-            // Calculate start of THIS week (Monday)
             const today = new Date();
             const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
-            const startOfThisWeek = new Date(today);
-            startOfThisWeek.setDate(today.getDate() - currentDay);
-
-            // Add offset for next week
+            const startOfThisWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - currentDay);
+            
             const startOfWeek = new Date(startOfThisWeek);
             startOfWeek.setDate(startOfWeek.getDate() + (state.weekOffset * 7));
 
@@ -673,15 +679,9 @@
                     state.dayIdx = i; 
                     renderDays(); 
                     renderBoard();
-                    updateNoteDisplay();
-                    updateBattery();
                 };
                 el.appendChild(div);
             });
-        }
-
-        function getRealDayIdx() {
-            return state.dayIdx + (state.weekOffset * 7);
         }
 
         /* --- RENDER BOARD --- */
@@ -694,17 +694,23 @@
             wrapper.innerHTML = html + 
                 '<div id="col-giang" class="col-area"></div>' + 
                 '<div id="col-huyen" class="col-area"></div>' + 
-                '<div id="now-line"></div>';
+                '<div id="now-line"><div id="now-line-time">00:00</div></div>';
         }
 
         function renderBoard() {
-            const realIdx = getRealDayIdx();
-            const d = state.data[realIdx] || { Giang: [], Huyen: [] };
+            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+            const d = state.data[dateKey] || { Giang: [], Huyen: [] };
             renderCol('giang', d.Giang || [], 'Giang');
             renderCol('huyen', d.Huyen || [], 'Huyen');
             
-            // Show/Hide Now Line based on week
-            document.getElementById('now-line').style.display = (state.weekOffset === 0) ? 'block' : 'none';
+            // Ẩn thanh tia Laser nếu không phải ngày hôm nay
+            const today = new Date();
+            const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
+            if (state.weekOffset === 0 && state.dayIdx === currentDay) {
+                document.getElementById('now-line').style.display = 'block';
+            } else {
+                document.getElementById('now-line').style.display = 'none';
+            }
         }
 
         function renderCol(id, tasks, user) {
@@ -730,131 +736,21 @@
             });
         }
 
-        /* --- LOVE BATTERY LOGIC --- */
-        function updateBattery() {
-            const realIdx = getRealDayIdx();
-            const d = state.data[realIdx];
-            if(!d) return;
-
-            // Simple heuristic: Count hours where both have tasks OR one has a 'date' task
-            let togetherScore = 0;
-            const tasksG = d.Giang || [];
-            const tasksH = d.Huyen || [];
+        /* --- CLOCK --- */
+        function updateClock() {
+            const now = new Date();
+            const h = now.getHours();
+            const m = now.getMinutes();
+            const t = (h*80) + (m/60*80);
             
-            // 1. Check Date tasks (High value)
-            tasksG.forEach(t => { if(t.cat === 'date') togetherScore += (t.end - t.start) * 2; });
-            tasksH.forEach(t => { if(t.cat === 'date') togetherScore += (t.end - t.start) * 2; });
-
-            // 2. Check Overlaps
-            // This is a simplified overlap check
-            let grid = Array(48).fill(0); // 30min slots
-            tasksG.forEach(t => { for(let k=t.start*2; k<t.end*2; k++) grid[k] += 1; });
-            tasksH.forEach(t => { for(let k=t.start*2; k<t.end*2; k++) grid[k] += 1; });
-            
-            let overlaps = 0;
-            grid.forEach(val => { if(val >= 2) overlaps++; });
-            togetherScore += (overlaps * 0.5); // 1 hour overlap = 1 point
-
-            // Cap at 100% (Let's say 8 "points" is 100% - aka 4 hours together)
-            let pct = Math.min(100, Math.round((togetherScore / 8) * 100));
-            
-            document.getElementById('battery-bar').style.width = pct + '%';
-            document.getElementById('battery-txt').innerText = pct + '%';
-        }
-
-        /* --- DAILY NOTES --- */
-        function updateNoteDisplay() {
-            const realIdx = getRealDayIdx();
-            const txt = state.notes[realIdx];
-            const el = document.getElementById('daily-note-display');
-            if(txt && txt.trim() !== '') {
-                el.innerText = txt;
-                el.style.fontStyle = 'normal';
-                el.style.opacity = '1';
-            } else {
-                el.innerText = "Chạm để viết ghi chú cho ngày này...";
-                el.style.fontStyle = 'italic';
-                el.style.opacity = '0.7';
+            const line = document.getElementById('now-line');
+            if(line) {
+                line.style.top = t + 'px';
+                document.getElementById('now-line-time').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
             }
         }
 
-        function saveNote() {
-            const txt = document.getElementById('inp-note-text').value;
-            const realIdx = getRealDayIdx();
-            state.notes[realIdx] = txt;
-            sync();
-            closeModal('note');
-        }
-
-        /* --- MODAL LOGIC & SLIDER --- */
-        function openModal(id) {
-            document.getElementById(`modal-${id}`).classList.add('open');
-            if(id === 'stats') calcStats();
-            if(id === 'note') {
-                document.getElementById('inp-note-text').value = state.notes[getRealDayIdx()] || '';
-            }
-        }
-        function closeModal(id) {
-            document.getElementById(`modal-${id}`).classList.remove('open');
-        }
-        
-        function openAddModal() {
-            openModal('add');
-            setFormUser(state.user);
-            const h = new Date().getHours();
-            document.getElementById('range-1').value = h;
-            document.getElementById('range-2').value = h + 1.5;
-            updateSlider();
-        }
-
-        function updateSlider() {
-            const r1 = document.getElementById('range-1');
-            const r2 = document.getElementById('range-2');
-            let val1 = parseFloat(r1.value);
-            let val2 = parseFloat(r2.value);
-
-            if (val1 >= val2) { val1 = val2 - 0.5; r1.value = val1; } 
-
-            const percent1 = (val1 / 24) * 100;
-            const percent2 = (val2 / 24) * 100;
-
-            const fill = document.getElementById('slider-fill');
-            fill.style.left = percent1 + "%";
-            fill.style.width = (percent2 - percent1) + "%";
-
-            document.getElementById('txt-start').innerText = formatTime(val1);
-            document.getElementById('txt-end').innerText = formatTime(val2);
-        }
-
-        function formatTime(val) {
-            const h = Math.floor(val);
-            const m = (val - h) * 60;
-            return `${h.toString().padStart(2,'0')}:${m===0?'00':m}`;
-        }
-
-        /* --- FORM & ACTIONS --- */
-        function renderFormUI() {
-            const cel = document.getElementById('cat-list');
-            CATS.forEach(c => {
-                const b = document.createElement('div');
-                b.className = 'cat-btn';
-                b.innerHTML = `${c.icon} ${c.name}`;
-                b.onclick = () => {
-                    state.cat = c.id;
-                    Array.from(cel.children).forEach(x => x.classList.remove('selected'));
-                    b.classList.add('selected');
-                };
-                cel.appendChild(b);
-            });
-            cel.children[0].classList.add('selected');
-        }
-
-        function setFormUser(u) {
-            state.user = u;
-            document.getElementById('btn-u-Giang').className = `toggle-btn ${u==='Giang'?'active g':''}`;
-            document.getElementById('btn-u-Huyen').className = `toggle-btn ${u==='Huyen'?'active h':''}`;
-        }
-
+        /* --- ACTIONS (THAO TÁC DATA) --- */
         function saveTask() {
             let t = document.getElementById('inp-title').value.trim();
             const s = parseFloat(document.getElementById('range-1').value);
@@ -871,9 +767,12 @@
                 t = arr[Math.floor(Math.random() * arr.length)];
             }
 
-            const realIdx = getRealDayIdx();
-            if(!state.data[realIdx]) state.data[realIdx] = {Giang:[], Huyen:[]};
-            state.data[realIdx][state.user].push({title:t, start:s, end:e, cat:state.cat, done:false});
+            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+            if(!state.data[dateKey]) state.data[dateKey] = {Giang:[], Huyen:[]};
+            if(!state.data[dateKey].Giang) state.data[dateKey].Giang = [];
+            if(!state.data[dateKey].Huyen) state.data[dateKey].Huyen = [];
+
+            state.data[dateKey][state.user].push({title:t, start:s, end:e, cat:state.cat, done:false});
             
             sync();
             closeModal('add');
@@ -881,8 +780,8 @@
         }
 
         function toggleDone(i, u) {
-            const realIdx = getRealDayIdx();
-            const task = state.data[realIdx][u][i];
+            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+            const task = state.data[dateKey][u][i];
             task.done = !task.done;
             if(task.done) {
                 state.points[u] += 10;
@@ -895,26 +794,27 @@
         }
 
         function delTask(i, u) {
-            if(confirm('Xóa nha?')) {
-                const realIdx = getRealDayIdx();
-                state.data[realIdx][u].splice(i, 1);
+            // Thay thế window.confirm cũ
+            showConfirm('Xoá lịch này?', 'Bấm OK sẽ xoá vĩnh viễn nha!', () => {
+                const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+                state.data[dateKey][u].splice(i, 1);
                 sync();
-            }
+            });
         }
 
         function resetData() {
-            if(confirm('Xóa sạch lịch ngày này?')) {
-                const realIdx = getRealDayIdx();
-                state.data[realIdx] = {Giang:[], Huyen:[]};
+            showConfirm('Dọn sạch ngày', 'Bạn muốn xoá sạch bách lịch của ngày này luôn?', () => {
+                const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+                state.data[dateKey] = {Giang:[], Huyen:[]};
                 sync();
                 closeModal('settings');
-            }
+            });
         }
 
         /* --- STATS --- */
         function calcStats() {
-            const realIdx = getRealDayIdx();
-            const d = state.data[realIdx] || {Giang:[], Huyen:[]};
+            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+            const d = state.data[dateKey] || {Giang:[], Huyen:[]};
             let busyG = Array(48).fill(0), busyH = Array(48).fill(0);
             
             (d.Giang||[]).forEach(t=>{ for(let k=t.start*2; k<t.end*2; k++) busyG[k]=1; });
@@ -974,24 +874,81 @@
         }
 
         function quickAddDate() {
-            const realIdx = getRealDayIdx();
-            if(!state.data[realIdx]) state.data[realIdx] = {Giang:[], Huyen:[]};
+            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
+            if(!state.data[dateKey]) state.data[dateKey] = {Giang:[], Huyen:[]};
+            if(!state.data[dateKey].Giang) state.data[dateKey].Giang = [];
+            if(!state.data[dateKey].Huyen) state.data[dateKey].Huyen = [];
+
             const task = { title: "Date Night 💖", start: state.smartStart, end: state.smartEnd, cat: "date", done: false };
-            state.data[realIdx].Giang.push(task);
-            state.data[realIdx].Huyen.push(task);
+            state.data[dateKey].Giang.push(task);
+            state.data[dateKey].Huyen.push(task);
             sync();
             closeModal('stats');
             showToast('Đã lên kèo Date!', 'check');
             spawnHearts();
         }
 
-        /* --- VISUAL EFFECTS --- */
+        /* --- STANDARD UI --- */
+        function openModal(id) {
+            document.getElementById(`modal-${id}`).classList.add('open');
+            if(id === 'stats') calcStats();
+        }
+        function closeModal(id) { document.getElementById(`modal-${id}`).classList.remove('open'); }
+        
+        function openAddModal() {
+            openModal('add');
+            setFormUser(state.user);
+            const h = new Date().getHours();
+            document.getElementById('range-1').value = h;
+            document.getElementById('range-2').value = h + 1.5;
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const r1 = document.getElementById('range-1');
+            const r2 = document.getElementById('range-2');
+            let val1 = parseFloat(r1.value);
+            let val2 = parseFloat(r2.value);
+            if (val1 >= val2) { val1 = val2 - 0.5; r1.value = val1; } 
+            const percent1 = (val1 / 24) * 100;
+            const percent2 = (val2 / 24) * 100;
+            const fill = document.getElementById('slider-fill');
+            fill.style.left = percent1 + "%";
+            fill.style.width = (percent2 - percent1) + "%";
+            document.getElementById('txt-start').innerText = formatTime(val1);
+            document.getElementById('txt-end').innerText = formatTime(val2);
+        }
+        function formatTime(val) {
+            const h = Math.floor(val);
+            const m = (val - h) * 60;
+            return `${h.toString().padStart(2,'0')}:${m===0?'00':m}`;
+        }
+        function setFormUser(u) {
+            state.user = u;
+            document.getElementById('btn-u-Giang').className = `toggle-btn ${u==='Giang'?'active g':''}`;
+            document.getElementById('btn-u-Huyen').className = `toggle-btn ${u==='Huyen'?'active h':''}`;
+        }
+        function renderFormUI() {
+            const cel = document.getElementById('cat-list');
+            CATS.forEach(c => {
+                const b = document.createElement('div');
+                b.className = 'cat-btn';
+                b.innerHTML = `${c.icon} ${c.name}`;
+                b.onclick = () => {
+                    state.cat = c.id;
+                    Array.from(cel.children).forEach(x => x.classList.remove('selected'));
+                    b.classList.add('selected');
+                };
+                cel.appendChild(b);
+            });
+            cel.children[0].classList.add('selected');
+        }
+
         function sendPoke() {
             db.ref('poke').set({ from: state.user, ts: Date.now() });
             showToast(`Đã chọc ${state.user==='Giang'?'Huyền':'Giang'}!`, 'check');
             spawnHearts();
         }
-
         function spawnHearts() {
             for(let i=0; i<10; i++) {
                 const heart = document.createElement('div');
@@ -1004,12 +961,7 @@
                 setTimeout(() => heart.remove(), 2000);
             }
         }
-
-        function toggleMood(u) {
-            state.moods[u] = (state.moods[u] + 1) % MOODS.length;
-            sync();
-        }
-        
+        function toggleMood(u) { state.moods[u] = (state.moods[u] + 1) % MOODS.length; sync(); }
         function updateUserBar() {
             const mG = state.moods.Giang;
             const mH = state.moods.Huyen;
@@ -1018,21 +970,12 @@
             document.getElementById('pt-Giang').innerText = state.points.Giang;
             document.getElementById('pt-Huyen').innerText = state.points.Huyen;
         }
-
-        /* --- UTILS --- */
         function showToast(msg, type) {
             const t = document.getElementById('toast');
             t.innerHTML = `<i class="fa-solid fa-${type==='error'?'circle-exclamation':'check-circle'}" style="color:${type==='error'?'#f87171':'#4ade80'}"></i> ${msg}`;
             t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 2000);
         }
-
-        function updateClock() {
-            const now = new Date();
-            const t = (now.getHours()*80) + (now.getMinutes()/60*80);
-            document.getElementById('now-line').style.top = t + 'px';
-        }
-
         function setTheme(t) {
             state.theme = t;
             localStorage.setItem('ls_theme', t);
