@@ -6,78 +6,101 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Love Schedule</title>
+    <title>Love Schedule 2.0</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- 1. CORE VARIABLES & RESET --- */
+        /* --- 1. CORE VARIABLES --- */
         :root {
-            --safe-top: env(safe-area-inset-top);
-            --safe-bottom: env(safe-area-inset-bottom);
+            --safe-top: env(safe-area-inset-top, 20px);
+            --safe-bottom: env(safe-area-inset-bottom, 20px);
             --font-main: 'Plus Jakarta Sans', sans-serif;
-            --ease-ios: cubic-bezier(0.32, 0.72, 0, 1);
+            --ease-spring: cubic-bezier(0.25, 1.2, 0.3, 1);
+            --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+            --hour-height: 90px; /* Tối ưu để không cuộn quá dài */
         }
 
-        /* THEMES */
+        /* PREMIUM THEMES */
         [data-theme="sunset"] {
-            --bg-grad: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
-            --glass: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.5);
+            --bg-base: #fcf5ff;
+            --bg-grad: radial-gradient(at 0% 0%, #ffe5e5 0px, transparent 50%), radial-gradient(at 100% 0%, #fdeeff 0px, transparent 50%), radial-gradient(at 100% 100%, #e6dbfc 0px, transparent 50%), radial-gradient(at 0% 100%, #ffedf8 0px, transparent 50%);
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
             --surface: #ffffff;
-            --text-main: #4a044e;
-            --text-sub: #9d174d;
-            --primary: #db2777;
-            --secondary: #4f46e5;
-            --accent: #f472b6;
-            --now-color: #ef4444;
+            --text-main: #2d1b2e;
+            --text-sub: #8a5a83;
+            --primary: #ff477e;
+            --primary-glow: rgba(255, 71, 126, 0.3);
+            --secondary: #8c52ff;
+            --secondary-glow: rgba(140, 82, 255, 0.3);
+            --now-color: #ff1f5a;
         }
 
         [data-theme="ocean"] {
-            --bg-grad: linear-gradient(135deg, #a5f3fc 0%, #2563eb 100%);
-            --glass: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.6);
+            --bg-base: #f0f8ff;
+            --bg-grad: radial-gradient(at 0% 0%, #e0f2fe 0px, transparent 50%), radial-gradient(at 100% 0%, #e0e7ff 0px, transparent 50%), radial-gradient(at 100% 100%, #cffafe 0px, transparent 50%), radial-gradient(at 0% 100%, #dbeafe 0px, transparent 50%);
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
             --surface: #ffffff;
             --text-main: #0f172a;
-            --text-sub: #334155;
-            --primary: #0284c7;
-            --secondary: #0ea5e9;
-            --accent: #38bdf8;
+            --text-sub: #475569;
+            --primary: #0ea5e9;
+            --primary-glow: rgba(14, 165, 233, 0.3);
+            --secondary: #3b82f6;
+            --secondary-glow: rgba(59, 130, 246, 0.3);
             --now-color: #ef4444;
         }
 
         [data-theme="dark"] {
-            --bg-grad: linear-gradient(135deg, #0f172a 0%, #334155 100%);
-            --glass: rgba(30, 41, 59, 0.7);
+            --bg-base: #0f172a;
+            --bg-grad: radial-gradient(at 0% 0%, #1e1b4b 0px, transparent 50%), radial-gradient(at 100% 0%, #312e81 0px, transparent 50%), radial-gradient(at 100% 100%, #0f172a 0px, transparent 50%), radial-gradient(at 0% 100%, #1e293b 0px, transparent 50%);
+            --glass-bg: rgba(15, 23, 42, 0.6);
             --glass-border: rgba(255, 255, 255, 0.1);
             --surface: #1e293b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
-            --primary: #818cf8;
-            --secondary: #c084fc;
-            --accent: #6366f1;
-            --now-color: #f87171;
+            --primary: #a855f7;
+            --primary-glow: rgba(168, 85, 247, 0.3);
+            --secondary: #ec4899;
+            --secondary-glow: rgba(236, 72, 153, 0.3);
+            --now-color: #06b6d4;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-        
-        body {
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            user-select: none; 
             margin: 0; padding: 0;
-            font-family: var(--font-main);
-            background: #f0f2f5; 
-            height: 100vh; width: 100vw;
-            display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
         }
 
-        /* --- 2. MOBILE FRAME WRAPPER --- */
+        /* CUSTOM SCROLLBAR */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--text-sub); border-radius: 10px; opacity: 0.3; }
+
+        html, body {
+            font-family: var(--font-main);
+            background: #000; 
+            width: 100vw; 
+            height: 100vh; /* Fallback */
+            height: 100dvh;
+            position: fixed;
+            overflow: hidden;
+            overscroll-behavior-y: none;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+        }
+
         #mobile-frame {
             width: 100%; height: 100%;
-            background: var(--bg-grad);
+            background-color: var(--bg-base);
+            background-image: var(--bg-grad);
             position: relative;
             display: flex; flex-direction: column;
             overflow: hidden;
@@ -85,308 +108,332 @@
 
         @media (min-width: 768px) {
             #mobile-frame {
-                width: 375px; height: 812px;
+                width: 390px; height: 844px;
                 border-radius: 40px;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
                 border: 8px solid #111;
             }
         }
 
-        /* --- 3. LOADING --- */
+        /* --- LOADING --- */
         #splash {
             position: absolute; inset: 0; z-index: 9999;
-            background: var(--surface);
+            background-color: var(--bg-base);
+            background-image: var(--bg-grad);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: opacity 0.6s var(--ease-ios);
+            transition: opacity 0.6s var(--ease-smooth), visibility 0.6s;
         }
-        .loader-ring {
-            width: 50px; height: 50px; border: 4px solid var(--primary);
-            border-top-color: transparent; border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .pulse-logo {
+            font-size: 60px;
+            animation: pulse-heart 1.2s infinite var(--ease-spring);
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse-heart {
+            0% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary)); }
+            30% { transform: scale(1.15); filter: drop-shadow(0 0 30px var(--primary)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 10px var(--primary)); }
+        }
 
-        /* --- 4. HEADER UI --- */
+        /* --- HEADER UI --- */
         header {
             flex: none; z-index: 50;
-            background: var(--glass);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: var(--glass-bg);
+            backdrop-filter: blur(25px) saturate(200%);
+            -webkit-backdrop-filter: blur(25px) saturate(200%);
             border-bottom: 1px solid var(--glass-border);
             padding-top: max(10px, var(--safe-top));
-            border-radius: 0 0 24px 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 0 0 32px 32px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
         }
 
         .header-top {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 20px 5px 20px;
+            padding: 10px 20px;
         }
-        .brand { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; }
+        .brand { font-size: 22px; font-weight: 900; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: center; }
         .live-dot {
-            width: 8px; height: 8px; background: #22c55e; border-radius: 50%;
-            display: inline-block; margin-left: 5px; box-shadow: 0 0 10px #22c55e;
-            animation: pulse 2s infinite;
+            width: 8px; height: 8px; background: #10b981; border-radius: 50%;
+            display: inline-block; margin-left: 8px; box-shadow: 0 0 12px #10b981;
+            animation: blink 2s infinite;
         }
+        @keyframes blink { 0%, 100% {opacity:1} 50% {opacity:0.3} }
         
+        .action-group { display: flex; gap: 8px; }
         .btn-icon {
-            width: 40px; height: 40px; border-radius: 12px;
-            border: 1px solid var(--glass-border); background: rgba(255,255,255,0.2);
-            color: var(--text-main); font-size: 16px;
+            width: 38px; height: 38px; border-radius: 14px;
+            background: rgba(0,0,0,0.04); color: var(--text-main); font-size: 15px; border: 1px solid var(--glass-border);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.2s;
+            cursor: pointer; transition: all 0.2s;
         }
-        .btn-icon:active { transform: scale(0.9); background: rgba(255,255,255,0.4); }
+        .btn-icon:active { transform: scale(0.9); background: rgba(0,0,0,0.1); }
 
         /* WEEK TOGGLE */
         .week-toggle {
-            display: flex; background: rgba(0,0,0,0.05); border-radius: 20px; margin: 0 20px 10px 20px; padding: 4px;
+            display: flex; background: rgba(0,0,0,0.04); border-radius: 16px; margin: 10px 20px; padding: 4px;
+            position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
         }
         .week-btn {
-            flex: 1; text-align: center; padding: 6px; font-size: 12px; font-weight: 700;
-            color: var(--text-sub); border-radius: 16px; transition: 0.3s;
-            cursor: pointer;
+            flex: 1; text-align: center; padding: 10px; font-size: 13px; font-weight: 800;
+            color: var(--text-sub); border-radius: 12px; transition: 0.3s; z-index: 2; cursor: pointer;
         }
-        .week-btn.active { background: var(--surface); color: var(--text-main); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .week-btn.active { color: var(--text-main); }
+        .week-slider {
+            position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px);
+            background: var(--surface); border-radius: 12px; z-index: 1;
+            transition: transform 0.3s var(--ease-spring);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
 
-        .date-strip {
-            display: flex; gap: 10px; overflow-x: auto;
-            padding: 0 20px 15px 20px;
-            scrollbar-width: none;
-        }
+        /* DATE STRIP */
+        .date-strip { display: flex; gap: 12px; overflow-x: auto; padding: 5px 20px 20px 20px; scroll-behavior: smooth; }
         .day-chip {
-            flex: 0 0 55px; height: 70px;
+            flex: 0 0 60px; height: 75px;
             background: var(--surface);
-            border-radius: 18px;
+            border-radius: 20px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            border: 2px solid transparent;
-            transition: all 0.3s var(--ease-ios);
-            cursor: pointer; position: relative; overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s var(--ease-spring);
+            cursor: pointer; opacity: 0.6; transform: scale(0.95);
         }
         .day-chip.active {
-            background: var(--primary); color: white;
-            box-shadow: 0 8px 20px -5px var(--primary);
-            transform: translateY(-4px);
+            opacity: 1; transform: scale(1.05) translateY(-2px);
+            background: var(--text-main); color: var(--surface);
+            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.15);
+            border-color: transparent;
         }
-        .day-chip span:first-child { font-size: 11px; font-weight: 600; opacity: 0.8; margin-bottom: 4px; }
-        .day-chip span:last-child { font-size: 18px; font-weight: 800; }
+        .day-chip span:first-child { font-size: 12px; font-weight: 700; opacity: 0.8; margin-bottom: 2px; }
+        .day-chip span:last-child { font-size: 20px; font-weight: 900; }
 
-        /* --- 5. MAIN TIMELINE --- */
+        /* --- MAIN TIMELINE --- */
         #main-view {
-            flex: 1; overflow-y: auto; position: relative;
-            scroll-behavior: smooth;
-            padding-bottom: 100px;
-            background: rgba(255,255,255,0.3);
+            flex: 1; overflow-y: auto; overflow-x: hidden; position: relative;
+            padding-bottom: max(100px, var(--safe-bottom));
+            -webkit-overflow-scrolling: touch;
         }
         
         .sticky-user-bar {
-            position: sticky; top: 0; z-index: 40;
-            display: flex; padding: 10px; gap: 10px;
-            background: var(--glass); backdrop-filter: blur(10px);
-            margin: 10px; border-radius: 16px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: sticky; top: 10px; z-index: 40;
+            display: flex; padding: 6px; gap: 10px;
+            background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            margin: 0 15px; border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid var(--glass-border);
         }
         .user-pill {
-            flex: 1; padding: 8px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; gap: 6px;
-            font-weight: 700; font-size: 13px; cursor: pointer;
-            transition: 0.2s; background: rgba(255,255,255,0.5);
-            color: var(--text-main); position: relative;
+            flex: 1; padding: 8px; border-radius: 16px;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 800; font-size: 14px; cursor: pointer;
+            background: var(--surface); color: var(--text-main);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: transform 0.2s;
         }
         .user-pill:active { transform: scale(0.96); }
-        .avatar { width: 28px; height: 28px; border-radius: 50%; background: white; display:flex; align-items:center; justify-content:center; font-size:12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        
-        /* Pet & Points */
-        .pet-icon { font-size: 20px; animation: bounce 2s infinite; }
-        .points-badge { 
-            background: var(--text-main); color: white; padding: 2px 6px; 
-            border-radius: 10px; font-size: 10px; font-weight: 800; margin-left: 4px; 
-        }
-        @keyframes bounce { 0%, 100% {transform:translateY(0);} 50% {transform:translateY(-3px);} }
+        .avatar-g { background: linear-gradient(135deg, var(--primary), #ff758c); color: white; width: 30px; height: 30px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-size: 13px; }
+        .avatar-h { background: linear-gradient(135deg, var(--secondary), #a18cd1); color: white; width: 30px; height: 30px; border-radius: 10px; display:flex; align-items:center; justify-content:center; font-size: 13px; }
+        .points-badge { background: rgba(0,0,0,0.05); color: var(--text-main); padding: 3px 8px; border-radius: 8px; font-size: 11px; font-weight: 900; margin-left: auto; }
 
-        /* GRID */
+        /* GRID AURORA */
         .grid-wrapper {
-            position: relative; margin-top: 5px;
-            height: 1920px; /* 24h * 80px */
-            background-image: linear-gradient(var(--glass-border) 1px, transparent 1px);
-            background-size: 100% 80px;
+            position: relative; margin-top: 15px; height: calc(24 * var(--hour-height)); 
+            background-image: linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 100% var(--hour-height);
         }
         
         .time-marker {
-            position: absolute; left: 10px; width: 40px; 
-            font-size: 11px; font-weight: 600; color: var(--text-sub);
+            position: absolute; left: 10px; width: 45px; 
+            font-size: 11px; font-weight: 800; color: var(--text-sub); opacity: 0.7;
             display: flex; align-items: center; padding-top: 2px;
         }
 
         .col-area {
             position: absolute; top: 0; bottom: 0;
-            width: calc(50% - 35px); 
+            width: calc(50% - 35px);
+            background: rgba(255,255,255,0.2); border-radius: 20px;
         }
-        #col-giang { left: 50px; border-right: 1px dashed rgba(0,0,0,0.1); }
-        #col-huyen { left: calc(50% + 15px); }
+        #col-giang { left: 55px; }
+        #col-huyen { left: calc(50% + 25px); }
 
-        /* TASK CARD */
+        /* TASK CARD 3D */
         .task {
             position: absolute; left: 4px; right: 4px;
-            border-radius: 14px; padding: 8px;
-            color: white; font-size: 12px; font-weight: 600;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 16px; padding: 10px;
+            color: white; font-size: 13px; font-weight: 600;
             cursor: pointer; overflow: hidden;
-            animation: popIn 0.4s var(--ease-ios);
-            border: 1px solid rgba(255,255,255,0.3);
-            backdrop-filter: blur(5px); transition: 0.2s;
+            animation: slideUpFade 0.4s var(--ease-spring);
+            display: flex; flex-direction: column;
+            border: 1px solid rgba(255,255,255,0.4);
+            transition: all 0.2s var(--ease-spring);
         }
-        .task.done { opacity: 0.6; filter: grayscale(0.8); }
-        .task.u-Giang { background: linear-gradient(135deg, var(--primary) 0%, #3b82f6 100%); }
-        .task.u-Huyen { background: linear-gradient(135deg, var(--accent) 0%, #db2777 100%); }
-        .task-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .task-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 6px; line-height: 1.2; }
-        .task-time { font-size: 10px; opacity: 0.9; }
+        @keyframes slideUpFade { 0% { opacity:0; transform: translateY(20px) scale(0.95); } 100% { opacity:1; transform: translateY(0) scale(1); } }
+        
+        .task:active { transform: scale(0.97); }
+        .task.done { opacity: 0.6; filter: grayscale(0.6); box-shadow: none !important; }
+        
+        .task.u-Giang { background: linear-gradient(135deg, var(--primary) 0%, #ff758c 100%); box-shadow: 0 6px 15px -3px var(--primary-glow); }
+        .task.u-Huyen { background: linear-gradient(135deg, var(--secondary) 0%, #a18cd1 100%); box-shadow: 0 6px 15px -3px var(--secondary-glow); }
+        
+        .task-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+        .task-title { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 6px; line-height: 1.3; text-shadow: 0 1px 2px rgba(0,0,0,0.1); word-break: break-word;}
+        .task-time { font-size: 11px; font-weight: 700; opacity: 0.95; background: rgba(0,0,0,0.15); padding: 2px 6px; border-radius: 6px; width: fit-content; margin-bottom: 4px;}
+        .task-note { font-size: 11px; font-weight: 500; opacity: 0.9; margin-top: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
         .btn-check {
-            width: 18px; height: 18px; border-radius: 50%; 
-            border: 2px solid white; background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px; border-radius: 50%; 
+            border: 2px solid rgba(255,255,255,0.8); background: rgba(0,0,0,0.1);
             display: flex; align-items: center; justify-content: center;
-            margin-left: 4px; cursor: pointer; flex-shrink: 0;
+            flex-shrink: 0; transition: 0.2s;
         }
-        .task.done .btn-check { background: #22c55e; border-color: #22c55e; }
+        .task.done .btn-check { background: #10b981; border-color: #10b981; }
         .btn-del {
-            position: absolute; bottom: 5px; right: 5px;
-            width: 20px; height: 20px; background: rgba(0,0,0,0.2);
+            position: absolute; bottom: 8px; right: 8px;
+            width: 26px; height: 26px; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            color: white; opacity: 0; transition: 0.2s; font-size: 10px;
+            color: white; opacity: 0; transition: 0.3s; font-size: 11px;
         }
         .task:hover .btn-del { opacity: 1; }
 
-        /* UPGRADED REALTIME LASER LINE */
+        /* LASER LINE XỊN */
         #now-line {
             position: absolute; left: 0; right: 0; height: 2px; background: var(--now-color);
             z-index: 10; pointer-events: none;
-            box-shadow: 0 0 10px var(--now-color), 0 0 20px var(--now-color);
+            box-shadow: 0 0 15px var(--now-color);
             transition: top 1s linear;
         }
         #now-line::before {
-            content:''; position: absolute; left: 45px; top: -4px;
-            width: 10px; height: 10px; border-radius: 50%;
-            background: var(--surface); border: 2px solid var(--now-color);
-            box-shadow: 0 0 10px var(--now-color);
+            content:''; position: absolute; left: 50px; top: -5px;
+            width: 12px; height: 12px; border-radius: 50%;
+            background: white; border: 3px solid var(--now-color);
+            box-shadow: 0 0 15px var(--now-color);
         }
-        /* Time Indicator on Line */
         #now-line-time {
             position: absolute; right: 15px; top: -12px;
             background: var(--now-color); color: white;
             padding: 4px 10px; border-radius: 12px;
             font-size: 11px; font-weight: 800; letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(255, 31, 90, 0.4);
         }
 
-        /* FAB & MODAL */
+        /* FAB NEUMORPHIC */
         .fab {
-            position: absolute; bottom: 30px; right: 24px;
-            width: 64px; height: 64px; border-radius: 24px;
+            position: absolute; bottom: max(25px, var(--safe-bottom)); right: 20px;
+            width: 60px; height: 60px; border-radius: 20px;
             background: var(--text-main); color: var(--surface);
-            border: none; font-size: 28px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
+            border: none; font-size: 24px;
+            box-shadow: 0 15px 30px -5px rgba(0,0,0,0.3);
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 60; transition: transform 0.3s var(--ease-ios);
+            cursor: pointer; z-index: 60; transition: all 0.3s var(--ease-spring);
         }
-        .fab:active { transform: scale(0.9) rotate(90deg); }
+        .fab:active { transform: scale(0.85) rotate(45deg); box-shadow: 0 8px 15px -5px rgba(0,0,0,0.3); }
 
+        /* BOTTOM SHEET MODAL */
         .modal-overlay {
             position: absolute; inset: 0; z-index: 100;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             opacity: 0; pointer-events: none; transition: opacity 0.3s;
             display: flex; align-items: flex-end;
         }
         .modal-overlay.open { opacity: 1; pointer-events: auto; }
         .modal-card {
             width: 100%; background: var(--surface);
-            border-radius: 32px 32px 0 0; padding: 24px;
+            border-radius: 36px 36px 0 0; padding: 25px 20px;
             padding-bottom: max(30px, var(--safe-bottom));
-            transform: translateY(100%); transition: transform 0.4s var(--ease-ios);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            transform: translateY(100%); transition: transform 0.4s var(--ease-spring);
+            box-shadow: 0 -15px 40px rgba(0,0,0,0.15);
+            max-height: 90vh; overflow-y: auto;
         }
         .modal-overlay.open .modal-card { transform: translateY(0); }
-        .handle { width: 40px; height: 5px; background: #e2e8f0; border-radius: 10px; margin: 0 auto 20px auto; }
-        .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 20px; color: var(--text-main); }
+        .handle { width: 45px; height: 5px; background: rgba(0,0,0,0.1); border-radius: 10px; margin: 0 auto 20px auto; }
+        .modal-title { font-size: 22px; font-weight: 900; margin-bottom: 20px; color: var(--text-main); letter-spacing: -0.5px;}
 
-        /* CUSTOM CONFIRM DIALOG */
+        /* DIALOG */
         #dialog-overlay {
             position: absolute; inset: 0; z-index: 200;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
         }
         #dialog-overlay.show { opacity: 1; pointer-events: auto; }
         .dialog-box {
-            width: 80%; background: var(--surface); padding: 20px;
-            border-radius: 24px; text-align: center;
-            transform: scale(0.9); transition: transform 0.2s var(--ease-ios);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            width: 80%; background: var(--surface); padding: 25px 20px;
+            border-radius: 32px; text-align: center;
+            transform: scale(0.9) translateY(20px); transition: all 0.3s var(--ease-spring);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
         }
-        #dialog-overlay.show .dialog-box { transform: scale(1); }
-        .dialog-btn-row { display: flex; gap: 10px; margin-top: 20px; }
-        .d-btn { flex: 1; padding: 12px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; transition: 0.2s; font-family: var(--font-main);}
-        .d-btn:active { transform: scale(0.95); }
-        .d-btn.cancel { background: #f1f5f9; color: var(--text-sub); }
-        .d-btn.confirm { background: var(--text-main); color: white; }
+        #dialog-overlay.show .dialog-box { transform: scale(1) translateY(0); }
+        .d-btn { flex: 1; padding: 14px; border-radius: 16px; border: none; font-weight: 800; cursor: pointer; transition: 0.2s; font-size: 15px; font-family: var(--font-main);}
+        .d-btn:active { transform: scale(0.92); }
+        .d-btn.cancel { background: rgba(0,0,0,0.05); color: var(--text-main); }
+        .d-btn.confirm { background: var(--now-color); color: white; box-shadow: 0 8px 20px rgba(255,31,90,0.3); }
 
-        /* FORM */
-        .toggle-group { display: flex; background: #f1f5f9; padding: 5px; border-radius: 16px; margin-bottom: 20px; }
-        .toggle-btn { flex: 1; padding: 12px; border: none; background: transparent; border-radius: 12px; font-weight: 700; color: var(--text-sub); transition: 0.2s; cursor: pointer; }
-        .toggle-btn.active.g { background: white; color: var(--primary); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .toggle-btn.active.h { background: white; color: var(--accent); box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        /* ADD TASK FORM */
+        .toggle-group { 
+            display: flex; background: rgba(0,0,0,0.04); padding: 5px; border-radius: 20px; margin-bottom: 20px; 
+            position: relative; 
+        }
+        .toggle-btn { 
+            flex: 1; padding: 12px; border: none; background: transparent; border-radius: 16px; 
+            font-weight: 800; font-size: 15px; color: var(--text-sub); z-index: 2; cursor: pointer; transition: 0.3s;
+        }
+        .toggle-btn.active { color: white; }
+        .form-slider {
+            position: absolute; top: 5px; bottom: 5px; left: 5px; width: calc(50% - 5px);
+            background: var(--text-main); border-radius: 16px; z-index: 1;
+            transition: transform 0.3s var(--ease-spring);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+        }
 
-        .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; margin-bottom: 10px; }
+        .cat-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 15px; margin-bottom: 5px; scrollbar-width: none;}
+        .cat-scroll::-webkit-scrollbar { display: none; }
         .cat-btn { 
-            padding: 10px 16px; border-radius: 20px; border: 1px solid var(--glass-border);
-            background: #f8fafc; font-weight: 600; font-size: 13px; color: var(--text-sub);
-            white-space: nowrap; cursor: pointer; transition: 0.2s; display: flex; gap: 6px;
+            padding: 12px 18px; border-radius: 20px; border: 2px solid transparent;
+            background: rgba(0,0,0,0.03); font-weight: 800; font-size: 14px; color: var(--text-sub);
+            white-space: nowrap; cursor: pointer; transition: 0.2s; display: flex; gap: 8px; align-items: center;
         }
-        .cat-btn.selected { background: var(--text-main); color: white; border-color: var(--text-main); transform: scale(1.05); }
+        .cat-btn.selected { background: var(--text-main); color: white; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
 
-        .inp-group { background: #f8fafc; border-radius: 16px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; border: 1px solid transparent; transition: 0.3s; }
-        .inp-group:focus-within { background: white; border-color: var(--text-main); }
-        .inp { border: none; background: transparent; width: 100%; font-size: 16px; font-weight: 600; outline: none; color: var(--text-main); }
+        .inp-group { background: rgba(0,0,0,0.03); border-radius: 20px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; border: 2px solid transparent; transition: 0.3s; }
+        .inp-group:focus-within { background: var(--surface); border-color: var(--primary); box-shadow: 0 8px 25px var(--primary-glow); }
+        
+        /* Chống Zoom iOS khi gõ: font-size phải >= 16px */
+        .inp { border: none; background: transparent; width: 100%; font-size: 16px; font-weight: 700; outline: none; color: var(--text-main); font-family: var(--font-main); }
+        .inp::placeholder { color: #a1a1aa; font-weight: 600;}
 
         .btn-main {
-            width: 100%; padding: 18px; border-radius: 20px;
-            background: var(--text-main); color: white;
-            border: none; font-size: 16px; font-weight: 800;
-            margin-top: 10px; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 10px 20px -5px rgba(0,0,0,0.2);
+            width: 100%; padding: 18px; border-radius: 24px;
+            background: var(--text-main); color: var(--surface);
+            border: none; font-size: 16px; font-weight: 900;
+            margin-top: 15px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 15px 30px -8px rgba(0,0,0,0.3); font-family: var(--font-main);
         }
-        .btn-main:active { transform: scale(0.98); }
+        .btn-main:active { transform: scale(0.96); box-shadow: 0 8px 15px -8px rgba(0,0,0,0.3); }
 
-        /* DUAL RANGE SLIDER */
-        .slider-container { position: relative; width: 100%; height: 50px; margin-bottom: 20px; margin-top: 10px; }
-        .slider-track { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; z-index: 1; }
-        .slider-track-fill { position: absolute; top: 50%; transform: translateY(-50%); height: 6px; background: var(--primary); z-index: 2; border-radius: 3px; }
+        /* SLIDER */
+        .slider-container { position: relative; width: 100%; height: 40px; margin-bottom: 20px; margin-top: 10px; }
+        .slider-track { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; height: 8px; background: rgba(0,0,0,0.05); border-radius: 4px; z-index: 1; }
+        .slider-track-fill { position: absolute; top: 50%; transform: translateY(-50%); height: 8px; background: var(--text-main); z-index: 2; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);}
         .range-inp { position: absolute; top: 50%; transform: translateY(-50%); width: 100%; pointer-events: none; -webkit-appearance: none; z-index: 3; background: none; }
-        .range-inp::-webkit-slider-thumb { -webkit-appearance: none; pointer-events: auto; width: 24px; height: 24px; border-radius: 50%; background: white; border: 2px solid var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer; }
-        .time-display { display: flex; justify-content: space-between; font-weight: 800; color: var(--text-main); margin-bottom: 5px; font-size: 18px; }
+        .range-inp::-webkit-slider-thumb { 
+            -webkit-appearance: none; pointer-events: auto; width: 28px; height: 28px; 
+            border-radius: 50%; background: white; border: 3px solid var(--text-main); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.2s;
+        }
+        .range-inp::-webkit-slider-thumb:active { transform: scale(1.2); }
+        .time-display { display: flex; justify-content: space-between; font-weight: 900; color: var(--text-main); margin-bottom: 5px; font-size: 20px; }
 
-        /* SMART DATING POPUP */
-        .smart-dating-card { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); border: 2px dashed #db2777; border-radius: 16px; padding: 15px; margin-top: 15px; text-align: center; display: none; animation: popIn 0.5s; }
-        .smart-btn { background: #db2777; color: white; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; margin-top: 8px; cursor: pointer; box-shadow: 0 4px 10px rgba(219, 39, 119, 0.4); }
+        /* STATS CHIPS */
+        .free-slot-chip {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white; padding: 12px 20px; border-radius: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; font-weight: 800; font-size: 15px;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+            animation: slideUpFade 0.3s ease forwards;
+        }
+        .empty-state { text-align: center; color: var(--text-sub); font-weight: 700; padding: 20px; opacity: 0.8; font-size: 15px; }
 
         /* HEART ANIMATION */
-        .floating-heart { position: fixed; font-size: 24px; color: #db2777; pointer-events: none; z-index: 999; animation: floatUp 1.5s ease-out forwards; }
-        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-200px) scale(1.5); opacity: 0; } }
-
-        /* STATS CSS */
-        .cinema-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 15px; }
-        .seat-item { aspect-ratio: 1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: white; transition: transform 0.2s; }
-        .seat-item.free { background: #4ade80; box-shadow: 0 2px 5px rgba(74, 222, 128, 0.4); }
-        .seat-item.mix { background: #fbbf24; box-shadow: 0 2px 5px rgba(251, 191, 36, 0.4); }
-        .seat-item.busy { background: #ef4444; opacity: 0.4; }
-        .session-title { font-size: 12px; font-weight: 800; color: var(--text-sub); margin: 15px 0 8px 0; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 4px; }
-        .legend-row { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; background: #f8fafc; padding: 10px; border-radius: 12px; }
-        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text-sub); }
-        .dot { width: 10px; height: 10px; border-radius: 3px; }
-        .stats-verdict { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 15px; border-radius: 16px; text-align: center; margin-top: 10px; box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3); animation: popIn 0.5s var(--ease-ios); }
+        .floating-heart { position: fixed; font-size: 30px; pointer-events: none; z-index: 999; animation: floatUp 2s ease-out forwards; filter: drop-shadow(0 8px 12px rgba(255, 31, 90, 0.3));}
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5) rotate(-20deg); opacity: 0; } 20% { opacity: 1; transform: translateY(-50px) scale(1.2) rotate(10deg);} 100% { transform: translateY(-300px) scale(1.5) rotate(30deg); opacity: 0; } }
 
         /* TOAST */
-        #toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; font-weight: 600; z-index: 200; transition: transform 0.4s var(--ease-ios); display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); white-space: nowrap; }
+        #toast { position: absolute; top: max(20px, var(--safe-top)); left: 50%; transform: translateX(-50%) translateY(-150px); background: var(--text-main); color: var(--surface); padding: 14px 24px; border-radius: 24px; font-size: 14px; font-weight: 800; z-index: 200; transition: transform 0.4s var(--ease-spring); display: flex; align-items: center; gap: 10px; box-shadow: 0 15px 40px rgba(0,0,0,0.25); white-space: nowrap;}
         #toast.show { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
@@ -395,35 +442,36 @@
     <div id="mobile-frame">
         
         <div id="splash">
-            <div class="loader-ring"></div>
-            <h2 style="margin-top:20px; font-size:16px; color:var(--text-sub)">Đang đồng bộ...</h2>
+            <div class="pulse-logo">💖</div>
+            <h2 style="margin-top:25px; font-size:20px; font-weight:900; color:var(--text-main)">Love Schedule 2.0</h2>
         </div>
 
-        <div id="toast"><i class="fa-solid fa-check-circle" style="color:#4ade80"></i> <span>Đã lưu thành công</span></div>
+        <div id="toast"><i class="fa-solid fa-bell" style="color:#10b981"></i> <span id="toast-msg">Thành công</span></div>
 
         <div id="dialog-overlay">
             <div class="dialog-box">
-                <div style="font-size:40px; margin-bottom:10px">🤔</div>
-                <div style="font-weight:800; font-size:18px; color:var(--text-main); margin-bottom:5px" id="d-title">Xác nhận</div>
-                <div style="color:var(--text-sub); font-size:14px" id="d-msg">Bạn chắc chắn chứ?</div>
-                <div class="dialog-btn-row">
+                <div style="font-size:50px; margin-bottom:15px; filter:drop-shadow(0 5px 10px rgba(0,0,0,0.1))">🤔</div>
+                <div style="font-weight:900; font-size:22px; color:var(--text-main); margin-bottom:8px" id="d-title">Xác nhận</div>
+                <div style="color:var(--text-sub); font-size:15px; line-height:1.4; font-weight:600" id="d-msg">Bạn chắc chắn chứ?</div>
+                <div class="dialog-btn-row" style="display:flex; gap:12px; margin-top:25px">
                     <button class="d-btn cancel" onclick="closeDialog(false)">Huỷ</button>
-                    <button class="d-btn confirm" onclick="closeDialog(true)">OK Chốt</button>
+                    <button class="d-btn confirm" onclick="closeDialog(true)">OK Luôn</button>
                 </div>
             </div>
         </div>
 
         <header>
             <div class="header-top">
-                <div class="brand">Love Schedule <span class="live-dot"></span></div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn-icon" onclick="sendPoke()"><i class="fa-solid fa-hand-point-right"></i></button>
-                    <button class="btn-icon" onclick="openModal('stats')"><i class="fa-solid fa-chart-pie"></i></button>
-                    <button class="btn-icon" onclick="openModal('settings')"><i class="fa-solid fa-gear"></i></button>
+                <div class="brand">Schedule<span class="live-dot"></span></div>
+                <div class="action-group">
+                    <button class="btn-icon" onclick="sendPoke()"><i class="fa-solid fa-hand-sparkles"></i></button>
+                    <button class="btn-icon" onclick="openStats()"><i class="fa-solid fa-chart-pie"></i></button>
+                    <button class="btn-icon" onclick="openModal('settings')"><i class="fa-solid fa-sliders"></i></button>
                 </div>
             </div>
 
             <div class="week-toggle">
+                <div class="week-slider" id="wk-slider"></div>
                 <div class="week-btn active" id="wk-btn-0" onclick="setWeek(0)">Tuần Này</div>
                 <div class="week-btn" id="wk-btn-1" onclick="setWeek(1)">Tuần Sau</div>
             </div>
@@ -433,13 +481,13 @@
 
         <div id="main-view">
             <div class="sticky-user-bar">
-                <div class="user-pill" style="color:var(--primary)" onclick="toggleMood('Giang')">
-                    <div class="avatar">G</div> 
+                <div class="user-pill" onclick="toggleMood('Giang')">
+                    <div class="avatar-g">G</div> 
                     <div>Giang <span class="pet-icon" id="pet-Giang">🐶</span></div>
                     <span class="points-badge" id="pt-Giang">0</span>
                 </div>
-                <div class="user-pill" style="color:var(--secondary)" onclick="toggleMood('Huyen')">
-                    <div class="avatar">H</div> 
+                <div class="user-pill" onclick="toggleMood('Huyen')">
+                    <div class="avatar-h">H</div> 
                     <div>Huyền <span class="pet-icon" id="pet-Huyen">🐱</span></div>
                     <span class="points-badge" id="pt-Huyen">0</span>
                 </div>
@@ -448,10 +496,7 @@
             <div class="grid-wrapper" id="grid-area">
                 <div id="col-giang" class="col-area"></div>
                 <div id="col-huyen" class="col-area"></div>
-                
-                <div id="now-line">
-                    <div id="now-line-time">00:00</div>
-                </div>
+                <div id="now-line"><div id="now-line-time">00:00</div></div>
             </div>
         </div>
 
@@ -460,20 +505,29 @@
         <div id="modal-add" class="modal-overlay">
             <div class="modal-card">
                 <div class="handle"></div>
-                <div class="modal-title">Thêm lịch mới ✨</div>
+                <div class="modal-title">Lịch trình mới ✨</div>
+                
                 <div class="toggle-group">
-                    <button id="btn-u-Giang" onclick="setFormUser('Giang')" class="toggle-btn active g">Giang</button>
+                    <div class="form-slider" id="form-slider"></div>
+                    <button id="btn-u-Giang" onclick="setFormUser('Giang')" class="toggle-btn active">Giang</button>
                     <button id="btn-u-Huyen" onclick="setFormUser('Huyen')" class="toggle-btn">Huyền</button>
                 </div>
+                
                 <div class="cat-scroll" id="cat-list"></div>
+                
                 <div class="inp-group">
-                    <i class="fa-solid fa-pen" style="color:var(--text-sub)"></i>
-                    <input type="text" id="inp-title" class="inp" placeholder="Làm gì đó...">
+                    <i class="fa-solid fa-pen-nib" style="color:var(--text-sub); width:20px; text-align:center; font-size:16px"></i>
+                    <input type="text" id="inp-title" class="inp" placeholder="Bạn định làm gì?" autocomplete="off">
                 </div>
-                <div style="margin-top:20px; margin-bottom:10px">
+                <div class="inp-group">
+                    <i class="fa-solid fa-map-pin" style="color:var(--text-sub); width:20px; text-align:center; font-size:16px"></i>
+                    <input type="text" id="inp-note" class="inp" placeholder="Ghi chú thêm..." autocomplete="off">
+                </div>
+
+                <div style="margin-top:25px; margin-bottom:15px">
                     <div class="time-display">
                         <span id="txt-start">09:00</span>
-                        <i class="fa-solid fa-arrow-right" style="font-size:14px; opacity:0.5; margin-top:5px"></i>
+                        <i class="fa-solid fa-arrow-right-long" style="font-size:16px; opacity:0.3; margin-top:5px"></i>
                         <span id="txt-end">11:00</span>
                     </div>
                     <div class="slider-container">
@@ -483,7 +537,7 @@
                         <input type="range" min="0" max="24" step="0.5" value="11" id="range-2" class="range-inp" oninput="updateSlider()">
                     </div>
                 </div>
-                <button onclick="saveTask()" class="btn-main">Lưu Lịch</button>
+                <button onclick="saveTask()" class="btn-main">Tạo Lịch Trình</button>
             </div>
             <div class="absolute inset-0" onclick="closeModal('add')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
         </div>
@@ -491,20 +545,13 @@
         <div id="modal-stats" class="modal-overlay">
             <div class="modal-card">
                 <div class="handle"></div>
-                <div class="modal-title">Rạp Chiếu Phim Tình Yêu 🍿</div>
-                <div class="legend-row">
-                    <div class="legend-item"><div class="dot" style="background:#4ade80"></div> Rảnh</div>
-                    <div class="legend-item"><div class="dot" style="background:#fbbf24"></div> Lệch</div>
-                    <div class="legend-item"><div class="dot" style="background:#ef4444; opacity:0.5"></div> Bận</div>
-                </div>
-                <div id="stats-body" style="overflow-y:auto; max-height:50vh; padding-right:5px"></div>
-                <div id="smart-dating-popup" class="smart-dating-card">
-                    <div style="font-size:30px">💖</div>
-                    <div style="font-weight:700; color:#db2777; margin:5px 0">Cơ hội vàng!</div>
-                    <div style="font-size:13px; margin-bottom:10px">Cả hai đều rảnh từ <span id="smart-time"></span>.</div>
-                    <button class="smart-btn" onclick="quickAddDate()">Chốt kèo Date nha?</button>
-                </div>
-                <div id="stats-msg"></div>
+                <div class="modal-title">Thời Gian Rảnh Chung 🍿</div>
+                <p style="font-size: 14px; font-weight: 600; color: var(--text-sub); margin-bottom: 20px;">
+                    Dưới đây là các khung giờ trống của cả hai trong ngày này. Nhanh tay chốt kèo Date nhé!
+                </p>
+                <div id="stats-body" style="min-height: 150px;">
+                    </div>
+                <button onclick="closeModal('stats')" class="btn-main" style="background:transparent; color:var(--text-main); border:2px solid rgba(0,0,0,0.1); box-shadow:none; margin-top: 10px;">Đóng</button>
             </div>
             <div class="absolute inset-0" onclick="closeModal('stats')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
         </div>
@@ -512,15 +559,15 @@
         <div id="modal-settings" class="modal-overlay">
             <div class="modal-card">
                 <div class="handle"></div>
-                <div class="modal-title">Cài đặt ⚙️</div>
-                <p style="font-weight:700; margin-bottom:10px">Chọn giao diện</p>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
-                    <div onclick="setTheme('sunset')" style="height:50px; background:linear-gradient(135deg, #FF9A9E, #FECFEF); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
-                    <div onclick="setTheme('ocean')" style="height:50px; background:linear-gradient(135deg, #a5f3fc, #2563eb); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
-                    <div onclick="setTheme('dark')" style="height:50px; background:linear-gradient(135deg, #0f172a, #334155); border-radius:12px; cursor:pointer; border:2px solid transparent" class="theme-opt"></div>
+                <div class="modal-title">Tuỳ Biến 🎨</div>
+                <p style="font-weight:800; margin-bottom:12px; font-size: 13px; color:var(--text-sub)">CHỦ ĐỀ GIAO DIỆN</p>
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:35px;">
+                    <div onclick="setTheme('sunset')" style="height:60px; background:linear-gradient(135deg, #ff9a9e, #fecfef); border-radius:16px; cursor:pointer; border:3px solid transparent; box-shadow: 0 8px 15px rgba(0,0,0,0.05)" class="theme-opt"></div>
+                    <div onclick="setTheme('ocean')" style="height:60px; background:linear-gradient(135deg, #0ea5e9, #3b82f6); border-radius:16px; cursor:pointer; border:3px solid transparent; box-shadow: 0 8px 15px rgba(0,0,0,0.05)" class="theme-opt"></div>
+                    <div onclick="setTheme('dark')" style="height:60px; background:linear-gradient(135deg, #1e1b4b, #312e81); border-radius:16px; cursor:pointer; border:3px solid transparent; box-shadow: 0 8px 15px rgba(0,0,0,0.05)" class="theme-opt"></div>
                 </div>
-                <button onclick="resetData()" style="width:100%; padding:15px; border-radius:16px; background:#fee2e2; color:#ef4444; border:none; font-weight:700">
-                    <i class="fa-solid fa-trash"></i> Xóa lịch ngày này
+                <button onclick="resetData()" style="width:100%; padding:18px; border-radius:20px; background:#ffe4e6; color:#e11d48; border:none; font-weight:800; font-size:15px; box-shadow:0 8px 20px rgba(225, 29, 72, 0.15)">
+                    <i class="fa-solid fa-dumpster-fire" style="margin-right:8px"></i> Xoá Sạch Lịch Ngày Này
                 </button>
             </div>
             <div class="absolute inset-0" onclick="closeModal('settings')" style="height:100%; width:100%; position:absolute; z-index:-1"></div>
@@ -530,13 +577,13 @@
     <script>
         /* --- CONFIG FIREBASE --- */
         const firebaseConfig = { 
-            apiKey : "AIzaSyAb14CBAprIN6zJVa_c6nDKCoRq-eMcyBg" , 
-            authDomain : "loveschedule-d0297.firebaseapp.com" , 
-            databaseURL : "https://loveschedule-d0297-default-rtdb.firebaseio.com" , 
-            projectId : "loveschedule-d0297" , 
-            storageBucket : "loveschedule-d0297.firebasestorage.app" , 
-            messagingSenderId : "495772360588" , 
-            appId : "1:495772360588:web:f816fab7d24cea06d640a9" , 
+            apiKey : "AIzaSyAb14CBAprIN6zJVa_c6nDKCoRq-eMcyBg", 
+            authDomain : "loveschedule-d0297.firebaseapp.com", 
+            databaseURL : "https://loveschedule-d0297-default-rtdb.firebaseio.com", 
+            projectId : "loveschedule-d0297", 
+            storageBucket : "loveschedule-d0297.firebasestorage.app", 
+            messagingSenderId : "495772360588", 
+            appId : "1:495772360588:web:f816fab7d24cea06d640a9", 
             measurementId : "G-L83E6GRM6Y" 
         };
 
@@ -546,42 +593,39 @@
         /* --- CONSTANTS & STATE --- */
         const DAYS = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
         const CATS = [
-            {id:'study', icon:'📚', name:'Học'},
-            {id:'work', icon:'💻', name:'Làm'},
-            {id:'date', icon:'🍿', name:'Hẹn'},
-            {id:'game', icon:'🎮', name:'Game'},
-            {id:'eat', icon:'🍜', name:'Ăn'},
-            {id:'sleep', icon:'😴', name:'Ngủ'}
+            {id:'study', icon:'📚', name:'Học tập'},
+            {id:'work', icon:'💻', name:'Công việc'},
+            {id:'date', icon:'🍿', name:'Hẹn hò'},
+            {id:'game', icon:'🎮', name:'Chơi Game'},
+            {id:'eat', icon:'🍜', name:'Ăn uống'},
+            {id:'sleep', icon:'😴', name:'Ngủ nghỉ'}
         ];
-        const MOODS = ['😊','🥰','😤','😭','🤯','😴'];
-        const PET_G = ['🐶','🐕','🐩','🌭','🐕‍🦺'];
-        const PET_H = ['🐱','🐈','🐈‍⬛','🦁','😽'];
+        const MOODS = ['😊','🥰','😤','😭','😎','😴'];
+        const PET_G = ['🐶','🦮','🐕‍🦺','🐺','🦊'];
+        const PET_H = ['🐱','🐈','🐯','🐆','🐈‍⬛'];
+        const HOUR_HEIGHT = 90; // Khớp với CSS --hour-height
 
         let state = {
             dayIdx: new Date().getDay() === 0 ? 6 : new Date().getDay() - 1,
-            weekOffset: 0, // 0 = Tuần này, 1 = Tuần sau
-            user: 'Giang',
-            cat: 'study',
-            // ĐỔI SANG OBJECT MAP THEO NGÀY (YYYY-MM-DD) ĐỂ KHÔNG BỊ LỖI LỆCH TUẦN
-            data: {}, 
-            moods: { Giang: 0, Huyen: 1 },
-            points: { Giang: 0, Huyen: 0 },
-            theme: localStorage.getItem('ls_theme') || 'sunset',
-            smartStart: 0, smartEnd: 0
+            weekOffset: 0, user: 'Giang', cat: 'study',
+            data: {}, moods: { Giang: 0, Huyen: 1 }, points: { Giang: 0, Huyen: 0 },
+            theme: localStorage.getItem('ls_theme_v2') || 'sunset'
         };
 
         let dialogCallback = null;
 
-        /* --- CORE FUNCTIONS --- */
+        /* --- INIT --- */
         document.addEventListener('DOMContentLoaded', () => {
             setTheme(state.theme);
             renderDays();
             renderTimeMarkers();
             renderFormUI();
             
-            setTimeout(() => { document.getElementById('splash').style.opacity = 0; setTimeout(()=>document.getElementById('splash').style.display='none',500); }, 1500);
+            setTimeout(() => { 
+                document.getElementById('splash').style.opacity = 0; 
+                setTimeout(() => document.getElementById('splash').style.visibility = 'hidden', 600); 
+            }, 1200);
 
-            // Sync Data (Dùng bảng mới v3 để reset format dữ liệu lưu theo ngày thực tế)
             db.ref('schedule_data_v3').on('value', (snapshot) => {
                 const val = snapshot.val();
                 if (val) {
@@ -589,37 +633,30 @@
                     state.moods = val.moods || state.moods;
                     state.points = val.points || { Giang: 0, Huyen: 0 };
                 }
-                renderBoard();
-                updateUserBar();
+                renderBoard(); updateUserBar();
             });
 
-            // Listen for Poke
             db.ref('poke').on('value', (snap) => {
                 const val = snap.val();
                 if(val && val.ts > Date.now() - 5000 && val.from !== state.user) {
-                    showToast(`${val.from} vừa chọc bạn!`, 'check');
-                    spawnHearts();
-                    if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                    showToast(`${val.from} đã gửi ngàn nụ hôn! 💋`);
+                    spawnHearts(); if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
             });
 
             setTimeout(() => {
                 const h = new Date().getHours();
-                document.getElementById('main-view').scrollTop = (h * 80) - 150;
+                document.getElementById('main-view').scrollTop = (h * HOUR_HEIGHT) - 150; 
             }, 800);
 
             updateClock(); setInterval(updateClock, 60000);
         });
 
         function sync() {
-            db.ref('schedule_data_v3').set({ 
-                data: state.data, 
-                moods: state.moods, 
-                points: state.points 
-            }).catch(() => showToast('Lỗi mạng', 'error'));
+            db.ref('schedule_data_v3').set({ data: state.data, moods: state.moods, points: state.points });
         }
 
-        /* --- DIALOG TÙY CHỈNH --- */
+        /* --- DIALOG --- */
         function showConfirm(title, msg, callback) {
             document.getElementById('d-title').innerText = title;
             document.getElementById('d-msg').innerText = msg;
@@ -632,54 +669,37 @@
             dialogCallback = null;
         }
 
-        /* --- WEEK & DAY LẤY CHUẨN ĐỊNH DẠNG NGÀY --- */
+        /* --- DATE CALC --- */
         function getDateKey(weekOffset, dayIdx) {
             const today = new Date();
-            const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1; // T2(0) -> CN(6)
-            
-            // Tính ngày bắt đầu của tuần hiện tại (Thứ 2)
+            const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1; 
             const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - currentDay);
-            // Cộng thêm tuần và ngày đang trỏ tới
             startOfWeek.setDate(startOfWeek.getDate() + (weekOffset * 7) + dayIdx);
-            
-            const yyyy = startOfWeek.getFullYear();
-            const mm = String(startOfWeek.getMonth() + 1).padStart(2, '0');
-            const dd = String(startOfWeek.getDate()).padStart(2, '0');
-            return `${yyyy}-${mm}-${dd}`;
+            return `${startOfWeek.getFullYear()}-${String(startOfWeek.getMonth() + 1).padStart(2, '0')}-${String(startOfWeek.getDate()).padStart(2, '0')}`;
         }
 
         function setWeek(offset) {
             state.weekOffset = offset;
-            document.getElementById('wk-btn-0').className = `week-btn ${offset===0?'active':''}`;
-            document.getElementById('wk-btn-1').className = `week-btn ${offset===1?'active':''}`;
-            renderDays();
-            renderBoard();
+            document.getElementById('wk-btn-0').classList.remove('active');
+            document.getElementById('wk-btn-1').classList.remove('active');
+            document.getElementById(`wk-btn-${offset}`).classList.add('active');
+            document.getElementById('wk-slider').style.transform = `translateX(${offset * 100}%)`;
+            renderDays(); renderBoard();
         }
 
         function renderDays() {
             const el = document.getElementById('date-strip');
             el.innerHTML = '';
-            
             const today = new Date();
             const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
-            const startOfThisWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - currentDay);
-            
-            const startOfWeek = new Date(startOfThisWeek);
-            startOfWeek.setDate(startOfWeek.getDate() + (state.weekOffset * 7));
+            const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - currentDay + (state.weekOffset * 7));
 
             DAYS.forEach((d, i) => {
-                const date = new Date(startOfWeek);
-                date.setDate(date.getDate() + i);
-                const dayNum = date.getDate();
-                
+                const date = new Date(startOfWeek); date.setDate(date.getDate() + i);
                 const div = document.createElement('div');
                 div.className = `day-chip ${i===state.dayIdx ? 'active' : ''}`;
-                div.innerHTML = `<span>${d}</span><span>${dayNum}</span>`;
-                div.onclick = () => {
-                    state.dayIdx = i; 
-                    renderDays(); 
-                    renderBoard();
-                };
+                div.innerHTML = `<span>${d}</span><span>${date.getDate()}</span>`;
+                div.onclick = () => { state.dayIdx = i; renderDays(); renderBoard(); };
                 el.appendChild(div);
             });
         }
@@ -688,25 +708,17 @@
         function renderTimeMarkers() {
             const wrapper = document.getElementById('grid-area');
             let html = '';
-            for(let i=0; i<=23; i++) {
-                html += `<div class="time-marker" style="top:${i*80}px">${i}:00</div>`;
-            }
-            wrapper.innerHTML = html + 
-                '<div id="col-giang" class="col-area"></div>' + 
-                '<div id="col-huyen" class="col-area"></div>' + 
-                '<div id="now-line"><div id="now-line-time">00:00</div></div>';
+            for(let i=0; i<=23; i++) { html += `<div class="time-marker" style="top:${i*HOUR_HEIGHT}px">${i}:00</div>`; }
+            wrapper.innerHTML = html + '<div id="col-giang" class="col-area"></div><div id="col-huyen" class="col-area"></div><div id="now-line"><div id="now-line-time">00:00</div></div>';
         }
 
         function renderBoard() {
-            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
-            const d = state.data[dateKey] || { Giang: [], Huyen: [] };
+            const d = state.data[getDateKey(state.weekOffset, state.dayIdx)] || { Giang: [], Huyen: [] };
             renderCol('giang', d.Giang || [], 'Giang');
             renderCol('huyen', d.Huyen || [], 'Huyen');
             
-            // Ẩn thanh tia Laser nếu không phải ngày hôm nay
             const today = new Date();
-            const currentDay = today.getDay() === 0 ? 6 : today.getDay() - 1;
-            if (state.weekOffset === 0 && state.dayIdx === currentDay) {
+            if (state.weekOffset === 0 && state.dayIdx === (today.getDay() === 0 ? 6 : today.getDay() - 1)) {
                 document.getElementById('now-line').style.display = 'block';
             } else {
                 document.getElementById('now-line').style.display = 'none';
@@ -720,8 +732,10 @@
                 const cat = CATS.find(c => c.id === t.cat) || CATS[0];
                 const div = document.createElement('div');
                 div.className = `task u-${user} ${t.done ? 'done' : ''}`;
-                div.style.top = (t.start * 80 + 2) + 'px';
-                div.style.height = ((t.end - t.start) * 80 - 4) + 'px';
+                div.style.top = (t.start * HOUR_HEIGHT + 2) + 'px'; 
+                div.style.height = ((t.end - t.start) * HOUR_HEIGHT - 4) + 'px';
+                
+                let noteHtml = t.note ? `<div class="task-note">${t.note}</div>` : '';
                 div.innerHTML = `
                     <div class="task-header">
                         <div class="task-title">${cat.icon} ${t.title}</div>
@@ -730,6 +744,7 @@
                         </div>
                     </div>
                     <div class="task-time">${formatTime(t.start)} - ${formatTime(t.end)}</div>
+                    ${noteHtml}
                     <div class="btn-del" onclick="event.stopPropagation(); delTask(${i}, '${user}')"><i class="fa-solid fa-xmark"></i></div>
                 `;
                 el.appendChild(div);
@@ -739,206 +754,146 @@
         /* --- CLOCK --- */
         function updateClock() {
             const now = new Date();
-            const h = now.getHours();
-            const m = now.getMinutes();
-            const t = (h*80) + (m/60*80);
-            
+            const t = (now.getHours()*HOUR_HEIGHT) + (now.getMinutes()/60*HOUR_HEIGHT);
             const line = document.getElementById('now-line');
             if(line) {
                 line.style.top = t + 'px';
-                document.getElementById('now-line-time').innerText = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+                document.getElementById('now-line-time').innerText = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
             }
         }
 
-        /* --- ACTIONS (THAO TÁC DATA) --- */
+        /* --- ACTIONS --- */
         function saveTask() {
             let t = document.getElementById('inp-title').value.trim();
+            let note = document.getElementById('inp-note').value.trim();
             const s = parseFloat(document.getElementById('range-1').value);
             const e = parseFloat(document.getElementById('range-2').value);
             
-            const CUTE_TITLES = {
-                study: ['Cày deadline', 'Tu luyện bí kíp', 'Học vì tương lai'],
-                date: ['Đi trốn', 'Nạp năng lượng', 'Date Time ❤️'],
-                game: ['Gánh team', 'Leo rank', 'Giải cứu thế giới'],
-                eat: ['Ăn sập quán', 'Nạp mana', 'Đói quá rồi']
-            };
-            if(!t) {
-                const arr = CUTE_TITLES[state.cat] || [CATS.find(c=>c.id===state.cat).name];
-                t = arr[Math.floor(Math.random() * arr.length)];
-            }
+            if(!t) t = CATS.find(c=>c.id===state.cat).name;
 
             const dateKey = getDateKey(state.weekOffset, state.dayIdx);
             if(!state.data[dateKey]) state.data[dateKey] = {Giang:[], Huyen:[]};
             if(!state.data[dateKey].Giang) state.data[dateKey].Giang = [];
             if(!state.data[dateKey].Huyen) state.data[dateKey].Huyen = [];
 
-            state.data[dateKey][state.user].push({title:t, start:s, end:e, cat:state.cat, done:false});
-            
-            sync();
-            closeModal('add');
-            document.getElementById('inp-title').value = '';
+            state.data[dateKey][state.user].push({title:t, note: note, start:s, end:e, cat:state.cat, done:false});
+            sync(); closeModal('add');
+            document.getElementById('inp-title').value = ''; document.getElementById('inp-note').value = '';
         }
 
         function toggleDone(i, u) {
-            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
-            const task = state.data[dateKey][u][i];
+            const task = state.data[getDateKey(state.weekOffset, state.dayIdx)][u][i];
             task.done = !task.done;
-            if(task.done) {
-                state.points[u] += 10;
-                showToast(`+10 điểm cho ${u}!`, 'check');
-                spawnHearts();
-            } else {
-                state.points[u] = Math.max(0, state.points[u] - 10);
-            }
+            if(task.done) { state.points[u] += 10; showToast(`Đỉnh quá! +10đ cho ${u}`); spawnHearts(); } 
+            else { state.points[u] = Math.max(0, state.points[u] - 10); }
             sync();
         }
 
         function delTask(i, u) {
-            // Thay thế window.confirm cũ
-            showConfirm('Xoá lịch này?', 'Bấm OK sẽ xoá vĩnh viễn nha!', () => {
-                const dateKey = getDateKey(state.weekOffset, state.dayIdx);
-                state.data[dateKey][u].splice(i, 1);
-                sync();
+            showConfirm('Xoá lịch này?', 'Cứ mạnh dạn bấm xoá, không ai trách đâu!', () => {
+                state.data[getDateKey(state.weekOffset, state.dayIdx)][u].splice(i, 1); sync();
             });
         }
 
         function resetData() {
-            showConfirm('Dọn sạch ngày', 'Bạn muốn xoá sạch bách lịch của ngày này luôn?', () => {
-                const dateKey = getDateKey(state.weekOffset, state.dayIdx);
-                state.data[dateKey] = {Giang:[], Huyen:[]};
-                sync();
-                closeModal('settings');
+            showConfirm('Clear sạch sẽ?', 'Xóa trắng lịch trình ngày này?', () => {
+                state.data[getDateKey(state.weekOffset, state.dayIdx)] = {Giang:[], Huyen:[]}; sync(); closeModal('settings');
             });
         }
 
-        /* --- STATS --- */
-        function calcStats() {
+        /* --- STATS LOGIC (Tính toán lịch trống) --- */
+        function openStats() {
             const dateKey = getDateKey(state.weekOffset, state.dayIdx);
             const d = state.data[dateKey] || {Giang:[], Huyen:[]};
-            let busyG = Array(48).fill(0), busyH = Array(48).fill(0);
             
-            (d.Giang||[]).forEach(t=>{ for(let k=t.start*2; k<t.end*2; k++) busyG[k]=1; });
-            (d.Huyen||[]).forEach(t=>{ for(let k=t.start*2; k<t.end*2; k++) busyH[k]=1; });
-            
-            let freeStreak = 0;
-            let foundSmart = false;
-            for(let i=16; i<44; i++) { 
-                if(busyG[i]===0 && busyH[i]===0) {
-                    freeStreak++;
-                    if(freeStreak >= 6) { 
-                        state.smartStart = (i - 5) / 2;
-                        state.smartEnd = (i + 1) / 2;
-                        foundSmart = true;
-                    }
+            // Tạo mảng 48 slot (mỗi slot 30 phút, từ 0h đến 24h)
+            let timeline = new Array(48).fill(0); 
+
+            // Đánh dấu slot bận
+            const markBusy = (tasks) => {
+                tasks.forEach(t => {
+                    let startSlot = Math.floor(t.start * 2);
+                    let endSlot = Math.ceil(t.end * 2);
+                    for(let i = startSlot; i < endSlot; i++) timeline[i] = 1; // 1 = Bận
+                });
+            };
+
+            markBusy(d.Giang || []);
+            markBusy(d.Huyen || []);
+
+            // Lọc ra các khoảng trống liên tục (Từ 6h sáng trở đi cho thực tế)
+            let freeBlocks = [];
+            let currentBlock = null;
+
+            for(let i = 12; i < 48; i++) { // Bắt đầu từ 6h sáng (slot 12)
+                if(timeline[i] === 0) {
+                    if(!currentBlock) currentBlock = { start: i / 2, end: (i + 1) / 2 };
+                    else currentBlock.end = (i + 1) / 2;
                 } else {
-                    freeStreak = 0;
+                    if(currentBlock) {
+                        // Chỉ lấy khoảng rảnh >= 1 giờ
+                        if(currentBlock.end - currentBlock.start >= 1) freeBlocks.push(currentBlock);
+                        currentBlock = null;
+                    }
                 }
             }
+            if(currentBlock && (currentBlock.end - currentBlock.start >= 1)) freeBlocks.push(currentBlock);
 
-            if(foundSmart) {
-                document.getElementById('smart-dating-popup').style.display = 'block';
-                document.getElementById('smart-time').innerText = `${formatTime(state.smartStart)} - ${formatTime(state.smartEnd)}`;
+            // Render UI
+            const body = document.getElementById('stats-body');
+            if(freeBlocks.length === 0) {
+                body.innerHTML = `<div class="empty-state">🥺 Kín lịch mất rồi. Hôm nay cả hai đều bận rộn!</div>`;
             } else {
-                document.getElementById('smart-dating-popup').style.display = 'none';
+                let html = '';
+                freeBlocks.forEach((block, idx) => {
+                    html += `
+                        <div class="free-slot-chip" style="animation-delay: ${idx * 0.1}s">
+                            <div><i class="fa-regular fa-clock" style="margin-right:6px"></i> Rảnh từ ${formatTime(block.start)} - ${formatTime(block.end)}</div>
+                            <div style="background:rgba(255,255,255,0.2); border-radius:10px; padding:4px 8px; font-size:12px;">${block.end - block.start}h</div>
+                        </div>
+                    `;
+                });
+                body.innerHTML = html;
             }
 
-            const sessions = [
-                { name: 'Sáng', start: 6, end: 12 },
-                { name: 'Chiều', start: 12, end: 18 },
-                { name: 'Tối', start: 18, end: 24 }
-            ];
-            let html = '';
-            let totalFree = 0;
-            sessions.forEach(sess => {
-                html += `<div class="session-title">${sess.name}</div><div class="cinema-grid">`;
-                for(let h=sess.start; h<sess.end; h++) {
-                    let status = 'free'; 
-                    const s1 = h*2, s2 = h*2+1;
-                    const bG = busyG[s1] || busyG[s2];
-                    const bH = busyH[s1] || busyH[s2];
-                    
-                    if(bG && bH) status = 'busy';
-                    else if(bG || bH) status = 'mix';
-                    
-                    if(status === 'free') totalFree++;
-                    html += `<div class="seat-item ${status}"><div>${h}h</div></div>`;
-                }
-                html += `</div>`;
-            });
-
-            document.getElementById('stats-body').innerHTML = html;
-            const msg = totalFree > 0 
-                ? `<div>Tìm thấy <b>${totalFree} giờ</b> rảnh chung!</div><div style="font-size:12px; opacity:0.9; margin-top:4px">Màu xanh là chân ái 💚</div>` 
-                : `<div>Kín lịch rồi 🥺</div>`;
-            document.getElementById('stats-msg').innerHTML = `<div class="stats-verdict">${msg}</div>`;
+            openModal('stats');
         }
 
-        function quickAddDate() {
-            const dateKey = getDateKey(state.weekOffset, state.dayIdx);
-            if(!state.data[dateKey]) state.data[dateKey] = {Giang:[], Huyen:[]};
-            if(!state.data[dateKey].Giang) state.data[dateKey].Giang = [];
-            if(!state.data[dateKey].Huyen) state.data[dateKey].Huyen = [];
-
-            const task = { title: "Date Night 💖", start: state.smartStart, end: state.smartEnd, cat: "date", done: false };
-            state.data[dateKey].Giang.push(task);
-            state.data[dateKey].Huyen.push(task);
-            sync();
-            closeModal('stats');
-            showToast('Đã lên kèo Date!', 'check');
-            spawnHearts();
-        }
-
-        /* --- STANDARD UI --- */
-        function openModal(id) {
-            document.getElementById(`modal-${id}`).classList.add('open');
-            if(id === 'stats') calcStats();
-        }
+        /* --- UI HELPERS --- */
+        function openModal(id) { document.getElementById(`modal-${id}`).classList.add('open'); }
         function closeModal(id) { document.getElementById(`modal-${id}`).classList.remove('open'); }
         
         function openAddModal() {
-            openModal('add');
-            setFormUser(state.user);
+            openModal('add'); setFormUser(state.user);
             const h = new Date().getHours();
-            document.getElementById('range-1').value = h;
-            document.getElementById('range-2').value = h + 1.5;
-            updateSlider();
+            document.getElementById('range-1').value = h; document.getElementById('range-2').value = h + 1.5; updateSlider();
         }
 
         function updateSlider() {
-            const r1 = document.getElementById('range-1');
-            const r2 = document.getElementById('range-2');
-            let val1 = parseFloat(r1.value);
-            let val2 = parseFloat(r2.value);
+            const r1 = document.getElementById('range-1'), r2 = document.getElementById('range-2');
+            let val1 = parseFloat(r1.value), val2 = parseFloat(r2.value);
             if (val1 >= val2) { val1 = val2 - 0.5; r1.value = val1; } 
-            const percent1 = (val1 / 24) * 100;
-            const percent2 = (val2 / 24) * 100;
-            const fill = document.getElementById('slider-fill');
-            fill.style.left = percent1 + "%";
-            fill.style.width = (percent2 - percent1) + "%";
+            document.getElementById('slider-fill').style.left = (val1/24*100) + "%";
+            document.getElementById('slider-fill').style.width = ((val2-val1)/24*100) + "%";
             document.getElementById('txt-start').innerText = formatTime(val1);
             document.getElementById('txt-end').innerText = formatTime(val2);
         }
-        function formatTime(val) {
-            const h = Math.floor(val);
-            const m = (val - h) * 60;
-            return `${h.toString().padStart(2,'0')}:${m===0?'00':m}`;
-        }
+        function formatTime(val) { const h = Math.floor(val), m = (val-h)*60; return `${h.toString().padStart(2,'0')}:${m===0?'00':m}`; }
+        
         function setFormUser(u) {
             state.user = u;
-            document.getElementById('btn-u-Giang').className = `toggle-btn ${u==='Giang'?'active g':''}`;
-            document.getElementById('btn-u-Huyen').className = `toggle-btn ${u==='Huyen'?'active h':''}`;
+            document.getElementById('btn-u-Giang').classList.remove('active');
+            document.getElementById('btn-u-Huyen').classList.remove('active');
+            document.getElementById(`btn-u-${u}`).classList.add('active');
+            document.getElementById('form-slider').style.transform = u==='Giang' ? 'translateX(0)' : 'translateX(100%)';
         }
+
         function renderFormUI() {
             const cel = document.getElementById('cat-list');
             CATS.forEach(c => {
                 const b = document.createElement('div');
-                b.className = 'cat-btn';
-                b.innerHTML = `${c.icon} ${c.name}`;
-                b.onclick = () => {
-                    state.cat = c.id;
-                    Array.from(cel.children).forEach(x => x.classList.remove('selected'));
-                    b.classList.add('selected');
-                };
+                b.className = 'cat-btn'; b.innerHTML = `${c.icon} ${c.name}`;
+                b.onclick = () => { state.cat = c.id; Array.from(cel.children).forEach(x => x.classList.remove('selected')); b.classList.add('selected'); };
                 cel.appendChild(b);
             });
             cel.children[0].classList.add('selected');
@@ -946,43 +901,45 @@
 
         function sendPoke() {
             db.ref('poke').set({ from: state.user, ts: Date.now() });
-            showToast(`Đã chọc ${state.user==='Giang'?'Huyền':'Giang'}!`, 'check');
-            spawnHearts();
+            showToast(`Đã gửi tương tư cho ${state.user==='Giang'?'Huyền':'Giang'}!`); spawnHearts();
         }
+        
         function spawnHearts() {
-            for(let i=0; i<10; i++) {
+            const emojis = ['❤️', '✨', '🔥', '💖'];
+            for(let i=0; i<12; i++) {
                 const heart = document.createElement('div');
-                heart.innerHTML = '❤️';
+                heart.innerHTML = emojis[Math.floor(Math.random()*emojis.length)];
                 heart.className = 'floating-heart';
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.top = '100vh';
-                heart.style.animationDuration = (Math.random() * 1 + 1) + 's';
+                heart.style.left = (Math.random() * 80 + 10) + 'vw';
+                heart.style.top = '100dvh';
+                heart.style.animationDuration = (Math.random() * 1.5 + 1) + 's';
                 document.body.appendChild(heart);
-                setTimeout(() => heart.remove(), 2000);
+                setTimeout(() => heart.remove(), 3000);
             }
         }
+        
         function toggleMood(u) { state.moods[u] = (state.moods[u] + 1) % MOODS.length; sync(); }
+        
         function updateUserBar() {
-            const mG = state.moods.Giang;
-            const mH = state.moods.Huyen;
-            document.getElementById('pet-Giang').innerText = (mG < 2) ? PET_G[0] : PET_G[2]; 
-            document.getElementById('pet-Huyen').innerText = (mH < 2) ? PET_H[0] : PET_H[3]; 
+            document.getElementById('pet-Giang').innerText = PET_G[state.moods.Giang % PET_G.length]; 
+            document.getElementById('pet-Huyen').innerText = PET_H[state.moods.Huyen % PET_H.length]; 
             document.getElementById('pt-Giang').innerText = state.points.Giang;
             document.getElementById('pt-Huyen').innerText = state.points.Huyen;
         }
-        function showToast(msg, type) {
+        
+        function showToast(msg) {
             const t = document.getElementById('toast');
-            t.innerHTML = `<i class="fa-solid fa-${type==='error'?'circle-exclamation':'check-circle'}" style="color:${type==='error'?'#f87171':'#4ade80'}"></i> ${msg}`;
+            document.getElementById('toast-msg').innerText = msg;
             t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2000);
+            setTimeout(() => t.classList.remove('show'), 3000);
         }
+        
         function setTheme(t) {
-            state.theme = t;
-            localStorage.setItem('ls_theme', t);
+            state.theme = t; localStorage.setItem('ls_theme_v2', t);
             document.documentElement.setAttribute('data-theme', t);
             document.querySelectorAll('.theme-opt').forEach(el => {
-                if(el.getAttribute('onclick').includes(t)) el.style.border = "2px solid var(--text-main)";
-                else el.style.border = "2px solid transparent";
+                if(el.getAttribute('onclick').includes(t)) el.style.border = "3px solid var(--text-main)";
+                else el.style.border = "3px solid transparent";
             });
         }
     </script>
